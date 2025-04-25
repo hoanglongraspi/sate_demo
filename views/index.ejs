@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SATE - Speech Analysis Tool and Evaluator</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    /* Rotate device overlay */
+    #rotateDeviceOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-align: center;
+      display: none;
+    }
+    
+    .rotate-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      animation: rotate 2s ease-in-out infinite;
+    }
+    
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      25% { transform: rotate(90deg); }
+      50% { transform: rotate(90deg); }
+      75% { transform: rotate(0deg); }
+      100% { transform: rotate(0deg); }
+    }
+    
+    /* Mobile notification banner */
+    #mobileTipBanner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background-color: #f0f9ff;
+      border-bottom: 1px solid #bae6fd;
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 500;
+      z-index: 9998;
+      text-align: center;
+      align-items: center;
+      justify-content: center;
+      color: #0369a1;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      display: none;
+    }
+    
+    /* Add hidden class to override display:flex !important */
+    #mobileTipBanner.hidden-banner {
+      display: none !important;
+    }
+    
+    #mobileTipBanner .material-icons {
+      font-size: 16px;
+      margin-right: 4px;
+    }
+    
+    #closeMobileTip {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 4px;
+      color: #0369a1;
+      opacity: 0.7;
+    }
+    
+    #closeMobileTip:hover {
+      opacity: 1;
+    }
+    
+    /* Phone-specific styles - specifically target phone sizes */
+    @media screen and (max-width: 1000px) {
+      /* Show the mobile tip banner only on phone-sized screens */
+      #mobileTipBanner {
+        display: flex !important;
+      }
+      
+      /* Add top margin to content when banner is visible */
+      body.has-tip-banner .flex.h-screen {
+        margin-top: 35px;
+      }
+      
+      /* Right sidebar optimizations for phone */
+      #rightSidebar {
+        width: 220px !important;
+        padding: 8px !important;
+      }
+      
+      /* Make the right sidebar more compact */
+      #rightSidebar h3 {
+        font-size: 14px !important;
+        margin-bottom: 8px !important;
+      }
+      
+      #rightSidebar .tab {
+        padding: 6px 8px !important;
+        font-size: 12px !important;
+      }
+      
+      /* Stack metrics vertically on phone */
+      #rightSidebar .metrics-container {
+        flex-direction: column !important;
+        gap: 8px !important;
+      }
+      
+      /* Fix invalid CSS property */
+      #rightSidebar .metrics-container.space-x-4 > * + * {
+        margin-left: 0 !important;
+      }
+      
+      /* Ensure consistent right sidebar width across media queries */
+      #rightSidebar {
+        width: 240px !important;
+        padding: 8px !important;
+      }
+      
+      /* Add space between issue charts for better phone display */
+      #rightSidebar .space-y-2 > * + * {
+        margin-top: 8px !important;
+      }
+      
+      /* Left sidebar adjustments for phone */
+      #leftSidebar {
+        width: 220px !important;
+      }
+      
+      /* Redesign metrics for mobile */
+      #rightSidebar .metric-card {
+        margin-bottom: 0 !important;
+        padding: 6px !important;
+        border-radius: 6px !important;
+      }
+      
+      #rightSidebar .metric-card .text-sm {
+        font-size: 10px !important;
+        margin-bottom: 0 !important;
+      }
+      
+      #rightSidebar .metric-card .text-2xl {
+        font-size: 18px !important;
+        line-height: 1 !important;
+      }
+      
+      /* Make charts more compact */
+      #rightSidebar .bg-white.rounded-lg {
+        padding: 8px !important;
+        margin-bottom: 8px !important;
+      }
+      
+      #rightSidebar .bg-white.rounded-lg h4 {
+        font-size: 12px !important;
+        margin-bottom: 6px !important;
+      }
+      
+      /* Issue bars */
+      #rightSidebar .flex.items-center {
+        margin-bottom: 4px !important;
+      }
+      
+      #rightSidebar .flex.items-center .w-24 {
+        width: 70px !important;
+        font-size: 10px !important;
+      }
+      
+      #rightSidebar .h-2\.5 {
+        height: 6px !important;
+      }
+      
+      /* Speech rate section */
+      #rightSidebar .text-4xl {
+        font-size: 20px !important;
+      }
+      
+      #rightSidebar .rate-quality {
+        padding: 2px 8px !important;
+        font-size: 10px !important;
+        border-radius: 4px !important;
+      }
+      
+      /* Issues tab */
+      #rightSidebar .issue-summary-item {
+        padding: 6px !important;
+      }
+      
+      #rightSidebar .issue-summary-item .font-medium {
+        font-size: 11px !important;
+      }
+      
+      #rightSidebar .issue-summary-item .text-lg {
+        font-size: 14px !important;
+        padding: 1px 6px !important;
+      }
+    }
+    
+    /* Comprehensive responsive styles for mobile */
+    @media (max-width: 768px) {
+      /* Remove the mobile tip banner display from here since we're handling it in the phone-specific media query */
+      
+      /* General sizing adjustments */
+      body {
+        font-size: 12px;
+      }
+      
+      h1 {
+        font-size: 1.5rem !important;
+      }
+      
+      h2 {
+        font-size: 1.25rem !important;
+      }
+      
+      h3 {
+        font-size: 1.125rem !important;
+      }
+      
+      h4 {
+        font-size: 1rem !important;
+      }
+      
+      /* Reduce padding throughout the app */
+      .p-6 {
+        padding: 12px !important;
+      }
+      
+      .p-5 {
+        padding: 10px !important;
+      }
+      
+      .p-4 {
+        padding: 8px !important;
+      }
+      
+      .p-3 {
+        padding: 6px !important;
+      }
+      
+      .px-6 {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+      }
+      
+      .py-4 {
+        padding-top: 8px !important;
+        padding-bottom: 8px !important;
+      }
+      
+      /* Sidebar adjustments */
+      #leftSidebar {
+        width: 200px !important;
+      }
+      
+      #rightSidebar {
+        width: 220px !important;
+      }
+      
+      /* Message bubbles */
+      .message-bubble {
+        padding: 8px 10px !important;
+        margin-bottom: 4px !important;
+        font-size: 12px !important;
+      }
+      
+      /* Audio control bar */
+      .audio-control-bar {
+        margin: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1) !important;
+        position: absolute !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 40 !important;
+        width: 100% !important;
+        max-height: none !important;
+        background-color: white !important;
+      }
+      
+      .audio-control-bar .px-4.py-4 {
+        padding: 6px !important;
+      }
+      
+      .audio-control-bar .mb-4 {
+        margin-bottom: 4px !important;
+      }
+      
+      /* Make the progress bar more touch-friendly */
+      .audio-control-bar .h-1 {
+        height: 4px !important;
+      }
+      
+      /* Make the progress handle larger for easier grabbing */
+      .audio-progress-handle {
+        width: 12px !important;
+        height: 12px !important;
+        margin-top: -5px !important;
+        box-shadow: 0 0 4px rgba(0,0,0,0.2) !important;
+        background-color: #fff !important;
+        border: 2px solid #5d6cfa !important;
+      }
+      
+      .audio-control-bar #currentTime,
+      .audio-control-bar #duration {
+        font-size: 10px !important;
+        min-width: 28px !important;
+      }
+      
+      /* Tighten timeline layout */
+      .audio-control-bar .flex.items-center.justify-between.mb-4 {
+        gap: 4px !important;
+      }
+      
+      .audio-control-bar .flex.items-center.justify-between.mb-4 .flex-1 {
+        margin: 0 2px !important;
+      }
+      
+      /* Layout adjustments for controls and tags */
+      .audio-control-bar .flex.justify-between.items-center {
+        flex-direction: column !important;
+        gap: 6px !important;
+      }
+      
+      /* Control buttons row */
+      .audio-control-bar .flex.gap-1.items-center {
+        width: 100% !important;
+        justify-content: center !important;
+        gap: 8px !important;
+      }
+      
+      /* Play button size adjustments */
+      #playButton {
+        width: 36px !important;
+        height: 36px !important;
+        flex-shrink: 0 !important;
+      }
+      
+      #playButton .material-icons {
+        font-size: 18px !important;
+      }
+      
+      /* Previous/next buttons */
+      #prevButton, #nextButton {
+        width: 28px !important;
+        height: 28px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+      }
+      
+      #prevButton .material-icons, #nextButton .material-icons {
+        font-size: 16px !important;
+      }
+      
+      /* Annotation filters row */
+      .audio-control-bar .annotation-filters {
+        display: flex !important;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+        width: 100% !important;
+        padding: 2px 0 !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+        margin-bottom: 2px !important;
+      }
+      
+      .audio-control-bar .annotation-filters::-webkit-scrollbar {
+        display: none !important;
+      }
+      
+      /* Filter button sizing */
+      .audio-control-bar .annotation-filter {
+        padding: 4px 8px !important;
+        font-size: 10px !important;
+        flex: 0 0 auto !important;
+        margin-right: 4px !important;
+        border-width: 1px !important;
+        line-height: 1 !important;
+      }
+      
+      .audio-control-bar .annotation-filter .material-icons {
+        font-size: 12px !important;
+        margin-right: 2px !important;
+      }
+      
+      /* Additional breakpoint for very small screens */
+      @media (max-width: 360px) {
+        .audio-control-bar .px-4.py-4 {
+          padding: 4px !important;
+        }
+        
+        #playButton {
+          width: 32px !important;
+          height: 32px !important;
+        }
+        
+        #prevButton, #nextButton {
+          width: 24px !important;
+          height: 24px !important;
+        }
+        
+        .audio-control-bar .annotation-filter {
+          padding: 3px 6px !important;
+          font-size: 9px !important;
+        }
+        
+        .audio-control-bar .annotation-filter .material-icons {
+          font-size: 10px !important;
+        }
+      }
+      
+      /* Icons */
+      .material-icons {
+        font-size: 18px !important;
+      }
+      
+      /* Buttons */
+      .btn {
+        padding: 4px 8px !important;
+        font-size: 12px !important;
+      }
+      
+      #playButton {
+        width: 32px !important;
+        height: 32px !important;
+      }
+      
+      /* Metrics and cards */
+      .metric-card {
+        padding: 8px !important;
+      }
+      
+      .text-2xl {
+        font-size: 1.25rem !important;
+      }
+      
+      .text-4xl {
+        font-size: 1.5rem !important;
+      }
+      
+      /* Text sizes */
+      .text-xs {
+        font-size: 9px !important;
+      }
+      
+      .text-sm {
+        font-size: 11px !important;
+      }
+      
+      /* Spacing */
+      .mb-6 {
+        margin-bottom: 12px !important;
+      }
+      
+      .mb-5 {
+        margin-bottom: 10px !important;
+      }
+      
+      .mb-4 {
+        margin-bottom: 8px !important;
+      }
+      
+      .mb-3 {
+        margin-bottom: 6px !important;
+      }
+      
+      .mb-2 {
+        margin-bottom: 4px !important;
+      }
+      
+      .mb-1 {
+        margin-bottom: 2px !important;
+      }
+      
+      .space-y-5 > * + * {
+        margin-top: 10px !important;
+      }
+      
+      .space-y-4 > * + * {
+        margin-top: 8px !important;
+      }
+      
+      .space-y-2 > * + * {
+        margin-top: 4px !important;
+      }
+      
+      /* Modal adjustments */
+      .modal-content {
+        width: 90% !important;
+        max-width: 320px !important;
+        padding: 12px !important;
+      }
+    }
+    
+    /* Audio control bar */
+    .audio-control-bar {
+      position: absolute !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      margin: 0 8px 8px 8px !important;
+      border-radius: 8px !important;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.1) !important;
+      z-index: 40 !important;
+      width: auto !important; /* Change from 100% to auto */
+      background-color: white !important;
+      overflow: hidden !important;
+    }
+    
+    /* Active state for filter buttons */
+    .annotation-filter.active-filter {
+      background-color: rgba(0, 0, 0, 0.07) !important;
+      font-weight: 500 !important;
+    }
+    
+    /* Color-specific active states for better visual feedback */
+    .annotation-filter[data-type="pause"].active-filter {
+      background-color: rgba(59, 130, 246, 0.15) !important;
+      color: #1e40af !important;
+    }
+    
+    .annotation-filter[data-type="filler"].active-filter {
+      background-color: rgba(249, 115, 22, 0.15) !important;
+      color: #9a3412 !important;
+    }
+    
+    .annotation-filter[data-type="repetition"].active-filter {
+      background-color: rgba(245, 158, 11, 0.15) !important;
+      color: #92400e !important;
+    }
+    
+    .annotation-filter[data-type="mispronunciation"].active-filter {
+      background-color: rgba(168, 85, 247, 0.15) !important;
+      color: #6b21a8 !important;
+    }
+    
+    .annotation-filter[data-type="grammar"].active-filter {
+      background-color: rgba(16, 185, 129, 0.15) !important;
+      color: #065f46 !important;
+    }
+    
+    .annotation-filter[data-type="all"].active-filter {
+      background-color: rgba(107, 114, 128, 0.15) !important;
+      color: #1f2937 !important;
+    }
+    
+    /* Progress handle improvement */
+    .audio-progress-handle {
+      position: absolute;
+      top: 50%;
+      width: 10px;
+      height: 10px;
+      background-color: #ffffff;
+      border: 2px solid #5d6cfa;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      cursor: pointer;
+      transition: width 0.1s, height 0.1s, border-width 0.1s;
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+      z-index: 2;
+    }
+    
+    /* Make the handle larger when dragging for better UX */
+    .audio-progress-handle.dragging {
+      width: 14px !important;
+      height: 14px !important;
+      border-width: 3px !important;
+      background-color: #f8fafc !important;
+    }
+    
+    /* Improve the click area of the progress bar */
+    .relative.flex-1.mx-3.h-1.bg-neutral-light {
+      cursor: pointer;
+      position: relative;
+      height: 10px !important; /* Increase the clickable area height */
+      border-radius: 5px !important;
+      background-color: #e5e7eb !important;
+      margin-top: -4px !important;
+      margin-bottom: -4px !important;
+    }
+    
+    /* Progress indicator styling */
+    .audio-progress-indicator {
+      position: absolute;
+      height: 100%;
+      background-color: #5d6cfa;
+      border-radius: 5px;
+      pointer-events: none;
+      transition: width 0.1s ease;
+    }
+    
+    /* Utility class to prevent text selection during dragging */
+    body.no-select {
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+    }
+    
+    /* Highlight-hidden class for filtered highlights */
+    .highlight-hidden {
+      background-color: transparent !important;
+      color: inherit !important;
+      cursor: text !important;
+    }
+    
+    /* Message bubble controls */
+    .relative.mb-3.full-width {
+      position: relative;
+    }
+    
+    .message-bubble {
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    
+    .message-controls {
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      display: flex;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      z-index: 10;
+    }
+    
+    .relative.mb-3.full-width:hover .message-controls {
+      opacity: 1;
+    }
+    
+    .message-controls button {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .message-controls button:hover {
+      transform: scale(1.1);
+    }
+    
+    .message-edit-mode {
+      border: 2px dashed #3b82f6 !important;
+      background-color: #eff6ff !important;
+    }
+    
+    /* Editable content styling */
+    [contenteditable=true] {
+      min-height: 24px;
+      padding: 8px 12px;
+      outline: none;
+    }
+    
+    [contenteditable=true]:focus {
+      border: 2px solid #3b82f6 !important;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+    
+    [contenteditable=true]:empty:before {
+      content: attr(placeholder);
+      color: #9ca3af;
+      font-style: italic;
+    }
+    
+    /* Tooltip style */
+    .tooltip {
+      position: absolute;
+      background-color: #374151;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      z-index: 50;
+      white-space: nowrap;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    
+    .tooltip:after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 5px solid #374151;
+    }
+    
+    /* Animation for new bubbles */
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .new-bubble {
+      animation: fadein 0.3s ease;
+    }
+    
+    /* Ensure the conversation area has proper padding for the control bar */
+    .flex-1.overflow-y-auto.px-6 {
+      padding-bottom: 120px !important; /* Add padding to prevent content being hidden behind the control bar */
+    }
+  </style>
+</head>
+<body class="bg-neutral-lightest has-tip-banner">
+  <!-- Rotate Device Overlay -->
+  <div id="rotateDeviceOverlay">
+    <i class="material-icons rotate-icon">screen_rotation</i>
+    <h2>Please Rotate Your Device</h2>
+    <p>For the best experience, please use landscape orientation</p>
+  </div>
+  
+  <!-- Mobile Tip Banner -->
+  <div id="mobileTipBanner">
+    <i class="material-icons">lightbulb</i>
+    <span>Tip: Hide left and right bars for better experience</span>
+    <button id="closeMobileTip">
+      <i class="material-icons" style="font-size: 14px;">close</i>
+    </button>
+  </div>
+
+  <div class="flex h-screen overflow-hidden">
+    <!-- Left Sidebar -->
+    <div id="leftSidebar" class="w-60 bg-white shadow-md flex flex-col overflow-hidden transition-all duration-300 relative">
+      <!-- Toggle button to hide sidebar -->
+      <button id="toggleLeftSidebar" class="absolute top-3 right-3 p-1.5 text-neutral-darker hover:text-primary z-20 rounded-full hover:bg-blue-50">
+        <i class="material-icons">chevron_left</i>
+      </button>
+      
+      <!-- Logo -->
+      <div class="p-5 text-center border-b border-neutral-light">
+        <h1 class="text-2xl text-neutral-darkest">SATE</h1>
+      </div>
+      
+      <!-- User Profile -->
+      <div class="flex items-center p-3 border-b border-neutral-light">
+        <div class="mr-2">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJc112JOdN9gNDUirnJ9kxQ1AcJgpQp4ipDw&s" alt="User Avatar" class="w-7 h-7 rounded-full">
+        </div>
+        <div class="font-medium flex-1">Sapphire</div>
+        <div class="text-neutral-darker">
+          <i class="material-icons text-sm">expand_more</i>
+        </div>
+      </div>
+      
+      <!-- Actions -->
+      <div class="flex p-4 border-b border-neutral-light">
+        <button id="recordBtn" class="btn btn-primary mr-2 flex-1">
+          <i class="material-icons text-lg mr-1">mic</i> Record
+        </button>
+        <button id="importBtn" class="btn btn-secondary flex-1">
+          <i class="material-icons text-lg mr-1">file_upload</i> Import
+        </button>
+      </div>
+      
+      <!-- Notes List -->
+      <div class="flex-1 overflow-y-auto">
+        <div class="py-2 px-5 text-xs text-neutral-darker bg-neutral-lightest">Fri, 18 Apr</div>
+        <div class="note-item active">
+          <div class="font-medium">Note 1</div>
+          <div class="text-xs text-neutral-darker">10:15 PM · 1 min</div>
+        </div>
+        
+        
+        
+        
+        
+      </div>
+    </div>
+    
+    <!-- Left sidebar toggle button (shown when sidebar is hidden) -->
+    <div id="showLeftSidebar" class="hidden absolute top-3 left-3 z-30 items-center justify-center">
+      <button class="p-2 text-neutral-darker hover:text-primary rounded-full bg-white shadow-md hover:bg-blue-50">
+        <i class="material-icons">chevron_right</i>
+      </button>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="flex flex-1 overflow-hidden">
+      <!-- Note Detail -->
+      <div class="flex-2 relative flex flex-col overflow-hidden border-r border-neutral-light">
+        <!-- Note Header -->
+        <div class="p-6 pb-4">
+          <h2 class="text-xl mb-2">Note 1</h2>
+          <div class="flex text-sm text-neutral-darker">
+            <span class="flex items-center mr-5">
+              <i class="material-icons text-sm mr-1">event</i> April 12, 2025
+            </span>
+            <span class="flex items-center mr-5">
+              <i class="material-icons text-sm mr-1">schedule</i> 1 min 17 sec
+            </span>
+            <span class="flex items-center">
+              <i class="material-icons text-sm mr-1">people</i> 2 people
+            </span>
+          </div>
+        </div>
+        
+        <!-- Scrollable Conversation -->
+        <div class="flex-1 overflow-y-auto px-6 pb-36">
+          <div class="space-y-5 mb-6">
+            <div class="relative">
+              <div class="font-medium mb-1">Examiner</div>
+              <div class="message-bubble doctor">
+                Okay, Tell me this story
+              </div>
+            </div>
+            
+            <!-- Patient speech with multiple bubbles -->
+            <div class="relative">
+              <div class="font-medium mb-1">Child</div>
+              
+              <!-- First sentence -->
+              <div class="relative mb-3 full-width">
+                <div class="message-bubble patient">
+                  <span class="highlight highlight-filler filler1 word-timestamp" data-timestamp="5.295:5.586" data-type="filler">um</span>
+                  <span class="highlight highlight-pause pause1" data-timestamp="5.586:7.248" data-type="pause" data-duration="1.662">...</span><span class="word-timestamp" data-timestamp="7.248:7.328">a</span> 
+                  <span class="word-timestamp" data-timestamp="7.428:7.968">rabbit</span> .
+                </div>
+                <!-- Message Controls -->
+                <div class="message-controls opacity-0 group-hover:opacity-100 absolute right-2 top-2 flex gap-1">
+                  <button class="message-edit p-1 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600" data-action="edit" title="Edit transcript">
+                    <i class="material-icons" style="font-size: 16px;">edit</i>
+                  </button>
+                  <button class="message-copy p-1 rounded-full bg-green-50 hover:bg-green-100 text-green-600" data-action="copy" title="Copy text">
+                    <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                  </button>
+                  <button class="message-delete p-1 rounded-full bg-red-50 hover:bg-red-100 text-red-600" data-action="delete" title="Delete">
+                    <i class="material-icons" style="font-size: 16px;">delete</i>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Second sentence -->
+              <div class="relative mb-3 full-width">
+                <div class="message-bubble patient">
+                  <span class="word-timestamp" data-timestamp="8.555:9.315">some</span> <span class="word-timestamp" data-timestamp="9.315:9.835">help</span> 
+                  <span class="highlight highlight-repetition repetition1" data-timestamp="9.835:13.312" data-type="repetition"><span class="word-timestamp" data-timestamp="9.835:10.215">with</span> 
+                  <span class="word-timestamp" data-timestamp="10.215:10.755">the</span> <span class="highlight highlight-filler filler2" data-timestamp="10.755:11.295" data-type="filler">um</span> 
+                  <span class="word-timestamp" data-timestamp="11.295:12.315">with</span> <span class="word-timestamp" data-timestamp="12.315:13.312">the</span></span>
+                  <span class="highlight highlight-pause pause2" data-timestamp="13.312:13.992" data-type="pause" data-duration="0.68">...</span><span class="word-timestamp" data-timestamp="13.992:14.373">dog</span> .
+                </div>
+                <!-- Message Controls -->
+                <div class="message-controls opacity-0 group-hover:opacity-100 absolute right-2 top-2 flex gap-1">
+                  <button class="message-edit p-1 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600" data-action="edit" title="Edit transcript">
+                    <i class="material-icons" style="font-size: 16px;">edit</i>
+                  </button>
+                  <button class="message-copy p-1 rounded-full bg-green-50 hover:bg-green-100 text-green-600" data-action="copy" title="Copy text">
+                    <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                  </button>
+                  <button class="message-delete p-1 rounded-full bg-red-50 hover:bg-red-100 text-red-600" data-action="delete" title="Delete">
+                    <i class="material-icons" style="font-size: 16px;">delete</i>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Third sentence -->
+              <div class="relative mb-3 full-width">
+                <div class="message-bubble patient">
+                  <span class="word-timestamp" data-timestamp="15.555:15.695">and</span> 
+                  <span class="highlight highlight-pause pause3" data-timestamp="15.695:16.574" data-type="pause" data-duration="0.879">...</span> <span class="word-timestamp" data-timestamp="16.574:16.715">he</span> <span class="word-timestamp" data-timestamp="16.715:17.035">wants</span> <span class="word-timestamp" data-timestamp="17.035:17.295">some</span> 
+                  <span class="word-timestamp" data-timestamp="17.295:17.675">help</span> <span class="word-timestamp" data-timestamp="17.675:18.335">to</span> <span class="word-timestamp" data-timestamp="18.335:18.755">with</span> <span class="word-timestamp" data-timestamp="18.755:18.995">me</span><span class="highlight highlight-pause pause4" data-timestamp="18.995:19.395" data-type="pause" data-duration="0.4">...</span>
+                  <span class="word-timestamp" data-timestamp="19.395:19.495">to</span> <span class="word-timestamp" data-timestamp="19.495:19.635">know</span> <span class="word-timestamp" data-timestamp="19.635:19.855">how</span> <span class="word-timestamp" data-timestamp="19.855:20.075">to</span> <span class="word-timestamp" data-timestamp="20.075:20.415">make</span> <span class="word-timestamp" data-timestamp="20.415:20.715">a</span> 
+                  <span class="word-timestamp" data-timestamp="20.715:21.215">sandcastle</span> .
+                </div>
+                <!-- Message Controls -->
+                <div class="message-controls opacity-0 group-hover:opacity-100 absolute right-2 top-2 flex gap-1">
+                  <button class="message-edit p-1 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600" data-action="edit" title="Edit transcript">
+                    <i class="material-icons" style="font-size: 16px;">edit</i>
+                  </button>
+                  <button class="message-copy p-1 rounded-full bg-green-50 hover:bg-green-100 text-green-600" data-action="copy" title="Copy text">
+                    <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                  </button>
+                  <button class="message-delete p-1 rounded-full bg-red-50 hover:bg-red-100 text-red-600" data-action="delete" title="Delete">
+                    <i class="material-icons" style="font-size: 16px;">delete</i>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Fourth sentence -->
+              <div class="relative mb-3 full-width">
+                <div class="message-bubble patient">
+                  <span class="word-timestamp" data-timestamp="25.305:25.545">and</span> <span class="word-timestamp" data-timestamp="25.545:25.745">he</span> <span class="highlight highlight-filler filler3" data-timestamp="25.745:26.485" data-type="filler">um</span> <span class="word-timestamp" data-timestamp="26.485:26.725">the</span> <span class="word-timestamp" data-timestamp="26.725:27.125">rabbit</span> 
+                  <span class="word-timestamp" data-timestamp="27.125:27.705">make</span> <span class="word-timestamp" data-timestamp="27.705:28.245">a</span> <span class="word-timestamp" data-timestamp="28.245:28.745">sandcastle</span> .
+                </div>
+              </div>
+              
+              <!-- Fifth sentence -->
+              <div class="relative mb-3 full-width">
+                <div class="message-bubble patient">
+                  <span class="word-timestamp" data-timestamp="30.545:32.305">and</span>
+                  <span class="highlight highlight-pause pause5" data-timestamp="32.305:33.305" data-type="pause" data-duration="1.0">...</span>
+                  <span class="word-timestamp" data-timestamp="33.305:34.845">the</span> <span class="word-timestamp" data-timestamp="34.845:35.325">rabbit</span> <span class="word-timestamp" data-timestamp="35.325:35.825">dump</span> <span class="word-timestamp" data-timestamp="35.825:36.345">all</span> <span class="word-timestamp" data-timestamp="36.345:36.765">the</span> <span class="word-timestamp" data-timestamp="36.765:37.225">sand</span> <span class="word-timestamp" data-timestamp="37.225:37.865">to</span> <span class="highlight highlight-repetition repetition2" data-timestamp="37.865:40.505" data-type="repetition"><span class="word-timestamp" data-timestamp="37.865:38.925">the</span> <span class="highlight highlight-pause pause6" data-timestamp="38.925:39.525" data-type="pause" data-duration="0.6">...</span> <span class="word-timestamp" data-timestamp="39.525:40.505">the</span></span> <span class="word-timestamp" data-timestamp="40.505:41.005">sandcastle</span> .
+                </div>
+              </div>
+              
+              <!-- Sixth sentence -->
+              <div class="relative mb-3 full-width">
+                <div class="message-bubble patient">
+                  <span class="word-timestamp" data-timestamp="43.715:43.935">and</span>
+                  <span class="highlight highlight-pause pause7" data-timestamp="43.935:44.535" data-type="pause" data-duration="0.6">...</span><span class="highlight highlight-repetition repetition3" data-timestamp="44.535:46.075" data-type="repetition"><span class="word-timestamp" data-timestamp="44.535:45.055">he</span> <span class="word-timestamp" data-timestamp="45.055:45.555">is</span> <span class="word-timestamp" data-timestamp="45.555:46.075">he</span></span> <span class="word-timestamp" data-timestamp="46.075:46.555">that</span> <span class="highlight highlight-mispronunciation mispronunciation1" data-timestamp="46.555:47.995" data-type="mispronunciation">accidentally</span> 
+                  <span class="highlight highlight-filler filler4" data-timestamp="47.995:48.415" data-type="filler">um</span><span class="highlight highlight-pause pause8" data-timestamp="48.415:49.115" data-type="pause" data-duration="0.7">...</span><span class="word-timestamp" data-timestamp="49.115:50.055">broke</span> <span class="word-timestamp" data-timestamp="50.055:51.155">his</span> <span class="highlight highlight-repetition repetition4" data-timestamp="51.155:53.535" data-type="repetition"><span class="word-timestamp" data-timestamp="51.155:51.695">the</span> <span class="word-timestamp" data-timestamp="51.695:52.315">dog's</span> <span class="highlight highlight-pause pause9" data-timestamp="52.315:52.814" data-type="pause" data-duration="0.499">...</span><span class="word-timestamp" data-timestamp="52.815:53.115">the</span> <span class="word-timestamp" data-timestamp="53.115:53.535">dog</span></span> 
+                  <span class="highlight highlight-pause pause10" data-timestamp="53.535:54.138" data-type="pause" data-duration="0.603">...</span><span class="word-timestamp" data-timestamp="54.138:55.535">sandcastle</span> .
+                </div>
+              </div>
+              
+              <!-- Seventh sentence -->
+              <div class="relative mb-3 full-width">
+                <div class="message-bubble patient">
+                  <span class="word-timestamp" data-timestamp="58.075:58.475">and</span><span class="highlight highlight-pause pause11" data-timestamp="58.475:59.17" data-type="pause" data-duration="0.695">...</span><span class="word-timestamp" data-timestamp="59.175:59.435">he</span><span class="highlight highlight-pause pause12" data-timestamp="59.435:60.437" data-type="pause" data-duration="1.002">...</span><span class="word-timestamp" data-timestamp="60.437:61.355">the</span> <span class="word-timestamp" data-timestamp="61.355:61.875">dog</span> <span class="word-timestamp" data-timestamp="61.875:62.615">never</span> <span class="highlight highlight-filler filler5" data-timestamp="62.615:63.235" data-type="filler">um</span>
+                  <span class="word-timestamp" data-timestamp="63.235:64.055">make</span> <span class="word-timestamp" data-timestamp="64.055:64.315">a</span> <span class="word-timestamp" data-timestamp="64.315:64.815">sandcastle</span> .
+                </div>
+              </div>
+              
+              <!-- Eighth sentence -->
+              <div class="relative mb-3 full-width">
+                <div class="message-bubble patient">
+                  <span class="word-timestamp" data-timestamp="65.595:65.655">and</span> <span class="word-timestamp" data-timestamp="65.655:65.935">he</span> <span class="word-timestamp" data-timestamp="65.935:66.435">cried</span> .
+                </div>
+              </div>
+              
+              <!-- Ninth sentence -->
+              <div class="relative mb-3 full-width">
+                <div class="message-bubble patient">
+                  <span class="word-timestamp" data-timestamp="67.355:67.415">and</span> <span class="word-timestamp" data-timestamp="67.415:67.995">there</span> <span class="word-timestamp" data-timestamp="67.995:68.495">bunny</span> <span class="word-timestamp" data-timestamp="68.495:69.075">rabbit</span><span class="highlight highlight-pause pause13" data-timestamp="69.075:69.763" data-type="pause" data-duration="0.688">...</span><span class="highlight highlight-filler filler6" data-timestamp="69.763:70.535" data-type="filler">um</span><span class="highlight highlight-pause pause14" data-timestamp="70.535:71.132" data-type="pause" data-duration="0.597">...</span><span class="word-timestamp" data-timestamp="71.132:71.635">be</span> <span class="word-timestamp" data-timestamp="71.635:72.095">sorry</span> <span class="word-timestamp" data-timestamp="72.095:72.475">that</span> <span class="word-timestamp" data-timestamp="72.475:72.975">he</span> .
+                </div>
+                <!-- Message Controls -->
+                <div class="message-controls opacity-0 group-hover:opacity-100 absolute right-2 top-2 flex gap-1">
+                  <button class="message-edit p-1 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600" data-action="edit" title="Edit transcript">
+                    <i class="material-icons" style="font-size: 16px;">edit</i>
+                  </button>
+                  <button class="message-copy p-1 rounded-full bg-green-50 hover:bg-green-100 text-green-600" data-action="copy" title="Copy text">
+                    <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                  </button>
+                  <button class="message-delete p-1 rounded-full bg-red-50 hover:bg-red-100 text-red-600" data-action="delete" title="Delete">
+                    <i class="material-icons" style="font-size: 16px;">delete</i>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Add New Line Button -->
+              <div class="text-center my-4">
+                <button id="addNewLineBtn" class="px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-full text-sm flex items-center mx-auto hover:bg-indigo-200 transition-colors">
+                  <i class="material-icons text-sm mr-1">add</i>
+                  Add new line
+                </button>
+              </div>
+            </div>
+
+
+          </div>
+        </div>
+        
+        <!-- Sticky Audio Controls -->
+        <div class="audio-control-bar" style="box-shadow: 0 8px 16px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #f0f0f0;">
+          <div class="px-4 py-4">
+            <!-- Timeline -->
+            <div class="flex items-center justify-between mb-4 relative">
+              <span class="text-xs text-neutral-darker" id="currentTime">0:00</span>
+              <div class="relative flex-1 mx-3 h-1 bg-neutral-light rounded-full overflow-hidden">
+                <div class="absolute inset-0 rounded-full audio-progress-indicator" style="width: 0%;"></div>
+                <div class="audio-progress-handle" style="left: 0%;"></div>
+              </div>
+              <span class="text-xs text-neutral-darker" id="duration">0:00</span>
+            </div>
+            
+            <!-- Control buttons and tags -->
+            <div class="flex justify-between items-center">
+              <!-- Control buttons -->
+              <div class="flex gap-1 items-center">
+                <button class="p-1 text-neutral-dark hover:text-black transition-colors" id="prevButton">
+                  <i class="material-icons text-sm">skip_previous</i>
+                </button>
+                <button class="flex items-center justify-center w-8 h-8 bg-neutral-darkest text-white rounded-full hover:bg-black shadow-sm transition-all hover:shadow-md" id="playButton">
+                  <i class="material-icons text-lg">play_arrow</i>
+                </button>
+                <button class="p-1 text-neutral-dark hover:text-black transition-colors" id="nextButton">
+                  <i class="material-icons text-sm">skip_next</i>
+                </button>
+                <!-- <button id="annotateBtn" class="ml-3 px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium flex items-center hover:bg-green-200 transition-colors">
+                  <i class="material-icons text-sm mr-1">edit</i>
+                  Annotate
+                </button> -->
+              </div>
+              
+              <!-- Tags -->
+              <div class="flex flex-wrap gap-1 annotation-filters">
+                <button class="px-3 py-1 rounded-full text-xs text-purple-900 border border-purple-500 bg-transparent hover:bg-purple-100 transition-colors annotation-filter" data-type="mispronunciation">
+                  <i class="material-icons text-xs mr-1 align-text-top">visibility</i>
+                  Mispronunciation
+                </button>
+                <button class="px-3 py-1 rounded-full text-xs text-blue-900 border border-blue-500 bg-transparent hover:bg-blue-100 transition-colors annotation-filter" data-type="pause">
+                  <i class="material-icons text-xs mr-1 align-text-top">visibility</i>
+                  Pauses
+                </button>
+                <button class="px-3 py-1 rounded-full text-xs text-amber-700 border border-amber-500 bg-transparent hover:bg-amber-100 transition-colors annotation-filter" data-type="grammar">
+                  <i class="material-icons text-xs mr-1 align-text-top">visibility</i>
+                  Grammar
+                </button>
+                <button class="px-3 py-1 rounded-full text-xs text-amber-900 border border-amber-500 bg-transparent hover:bg-amber-100 transition-colors annotation-filter" data-type="repetition">
+                  <i class="material-icons text-xs mr-1 align-text-top">visibility</i>
+                  Repetition
+                </button>
+                <button class="px-3 py-1 rounded-full text-xs text-orange-900 border border-orange-500 bg-transparent hover:bg-orange-100 transition-colors annotation-filter" data-type="filler">
+                  <i class="material-icons text-xs mr-1 align-text-top">visibility</i>
+                  Filler words
+                </button>
+                <button class="px-3 py-1 rounded-full text-xs text-gray-900 border border-gray-500 bg-transparent hover:bg-gray-100 transition-colors annotation-filter" data-type="all">
+                  <i class="material-icons text-xs mr-1 align-text-top">visibility</i>
+                  All
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Right sidebar (Analysis Panel) -->
+      <div id="rightSidebar" class="w-80 bg-neutral-lightest p-6 overflow-y-auto relative">
+        <!-- Toggle button to hide sidebar -->
+        <button id="toggleRightSidebar" class="absolute top-3 left-3 p-1.5 text-neutral-darker hover:text-primary z-20 rounded-full hover:bg-blue-50">
+          <i class="material-icons">chevron_right</i>
+        </button>
+        
+        <div class="mb-5">
+          <h3 class="text-lg mb-3">Speech Analysis</h3>
+          <div class="flex border-b border-neutral-light">
+            <div class="tab active" data-tab="overview">Overview</div>
+            <div class="tab" data-tab="issues">Issues</div>
+          </div>
+        </div>
+        
+        <div id="overview-tab" class="tab-content active">
+          <!-- Metrics -->
+          <div class="flex space-x-4 mb-6 metrics-container">
+            <div class="metric-card flex-1">
+              <div class="text-sm text-neutral-darker mb-1">Total Issues</div>
+              <div class="text-2xl font-bold">25</div>
+            </div>
+            <div class="metric-card flex-1">
+              <div class="text-sm text-neutral-darker mb-1">Duration</div>
+              <div class="text-2xl font-bold">1:17</div>
+            </div>
+          </div>
+          
+          <!-- Top Issues -->
+          <div class="bg-white rounded-lg p-5 shadow-card mb-6">
+            <h4 class="text-base mb-3">Top Issues</h4>
+            
+            <div class="space-y-2">
+              <div class="flex items-center">
+                <div class="w-24 text-sm">Pause</div>
+                <div class="flex-1 h-2.5 bg-neutral-lighter rounded-full mr-2 overflow-hidden">
+                  <div class="h-full bg-blue-400 rounded-full" style="width: 80%"></div>
+                </div>
+                <div class="text-sm font-medium">14</div>
+              </div>
+              
+              <div class="flex items-center">
+                <div class="w-24 text-sm">Filler words</div>
+                <div class="flex-1 h-2.5 bg-neutral-lighter rounded-full mr-2 overflow-hidden">
+                  <div class="h-full bg-orange-400 rounded-full" style="width: 35%"></div>
+                </div>
+                <div class="text-sm font-medium">6</div>
+              </div>
+              
+              <div class="flex items-center">
+                <div class="w-24 text-sm">Repetition</div>
+                <div class="flex-1 h-2.5 bg-neutral-lighter rounded-full mr-2 overflow-hidden">
+                  <div class="h-full bg-amber-400 rounded-full" style="width: 25%"></div>
+                </div>
+                <div class="text-sm font-medium">4</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Speech Rate -->
+          <div class="bg-white rounded-lg p-5 text-center shadow-card">
+            <h4 class="text-base mb-3">Speech rate</h4>
+            <div class="flex items-baseline justify-center mb-1">
+              <div class="text-4xl font-bold mr-1">100</div>
+              <div class="text-neutral-darker">wpm</div>
+            </div>
+            <div class="rate-quality bg-green-100 text-green-800">
+              Good
+            </div>
+          </div>
+        </div>
+        
+        <!-- Issues Tab Content -->
+        <div id="issues-tab" class="tab-content hidden">
+          <div class="flex flex-col h-full overflow-hidden">
+            <!-- Summary -->
+            <div class="bg-white rounded-lg p-5 shadow-card mb-6">
+              <h4 class="text-base mb-4 flex items-center">
+                <i class="material-icons text-neutral-darker mr-2" style="font-size: 20px;">analytics</i>
+                <span>Issue Summary</span>
+              </h4>
+              
+              <div class="space-y-4">
+                <!-- Pauses -->
+                <div class="issue-summary-item hover:bg-blue-50 border border-transparent hover:border-blue-100 rounded-lg transition-all">
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center">
+                      <div class="w-3 h-3 bg-blue-400 rounded-full mr-2"></div>
+                      <span class="font-medium text-blue-800">Pauses</span>
+                    </div>
+                    <div class="text-lg font-bold text-blue-700 bg-blue-50 px-3 py-0.5 rounded-full">14</div>
+                  </div>
+                  <div class="text-xs text-neutral-darker">
+                    Pauses over 0.5 seconds that interrupt the flow of speech
+                  </div>
+                </div>
+                
+                <!-- Filler Words -->
+                <div class="issue-summary-item hover:bg-orange-50 border border-transparent hover:border-orange-100 rounded-lg transition-all">
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center">
+                      <div class="w-3 h-3 bg-orange-400 rounded-full mr-2"></div>
+                      <span class="font-medium text-orange-800">Filler Words</span>
+                    </div>
+                    <div class="text-lg font-bold text-orange-700 bg-orange-50 px-3 py-0.5 rounded-full">6</div>
+                  </div>
+                  <div class="text-xs text-neutral-darker">
+                    Words like "um", "uh", "like" that don't add meaning
+                  </div>
+                </div>
+                
+                <!-- Repetitions -->
+                <div class="issue-summary-item hover:bg-amber-50 border border-transparent hover:border-amber-100 rounded-lg transition-all">
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center">
+                      <div class="w-3 h-3 bg-amber-400 rounded-full mr-2"></div>
+                      <span class="font-medium text-amber-800">Repetitions</span>
+                    </div>
+                    <div class="text-lg font-bold text-amber-700 bg-amber-50 px-3 py-0.5 rounded-full">4</div>
+                  </div>
+                  <div class="text-xs text-neutral-darker">
+                    Repeated words, phrases or syllables
+                  </div>
+                </div>
+                
+                <!-- Mispronunciations -->
+                <div class="issue-summary-item hover:bg-purple-50 border border-transparent hover:border-purple-100 rounded-lg transition-all">
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center">
+                      <div class="w-3 h-3 bg-purple-400 rounded-full mr-2"></div>
+                      <span class="font-medium text-purple-800">Mispronunciations</span>
+                    </div>
+                    <div class="text-lg font-bold text-purple-700 bg-purple-50 px-3 py-0.5 rounded-full">1</div>
+                  </div>
+                  <div class="text-xs text-neutral-darker">
+                    Words that were pronounced incorrectly
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            
+          </div>
+        </div>
+      </div>
+      
+      <!-- Right sidebar toggle button (shown when sidebar is hidden) -->
+      <div id="showRightSidebar" class="hidden absolute top-3 right-3 z-30 items-center justify-center">
+        <button class="p-2 text-neutral-darker hover:text-primary rounded-full bg-white shadow-md hover:bg-blue-50">
+          <i class="material-icons">chevron_left</i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recording Modal -->
+  <div id="recordingModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+    <div class="modal-content">
+      <h3 class="text-lg font-semibold mb-5">Recording</h3>
+      <div class="h-24 bg-neutral-lighter rounded-lg mb-4 flex items-center justify-center">
+        <div id="waveform" class="w-4/5 h-14" style="background-image: linear-gradient(90deg, #5d6cfa 1px, transparent 1px), linear-gradient(90deg, rgba(93, 108, 250, 0.5) 1px, transparent 1px); background-size: 10px 100%, 5px 100%;"></div>
+      </div>
+      <div class="text-center text-3xl font-bold mb-4 recording-time">00:00</div>
+      <div class="flex justify-center">
+        <button id="stopRecording" class="btn btn-danger mx-2 py-2 px-5 rounded-full">Stop</button>
+        <button id="pauseRecording" class="btn btn-secondary mx-2 py-2 px-5 rounded-full">Pause</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upload Modal -->
+  <div id="uploadModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+    <div class="modal-content">
+      <h3 class="text-lg font-semibold mb-5">Import Audio</h3>
+      <form id="uploadForm" class="mt-4">
+        <input type="file" id="audioFile" accept="audio/*" class="w-full mb-5" />
+        <button type="submit" class="btn btn-primary w-full py-2.5">Upload</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Grammar Annotation Modal -->
+  <div id="annotationModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+    <div class="modal-content w-[500px] max-w-full">
+      <div class="flex justify-between items-center mb-5">
+        <h3 class="text-lg font-semibold">Grammar Annotation</h3>
+        <button id="closeAnnotationModal" class="text-neutral-dark hover:text-black">
+          <i class="material-icons">close</i>
+        </button>
+      </div>
+      
+      <div class="mb-4">
+        <label class="block text-sm font-medium mb-2">Original Text</label>
+        <div class="p-3 bg-neutral-lightest rounded border border-neutral-light text-sm">
+          <span class="highlight highlight-grammar">dog's</span> the <span class="highlight highlight-grammar">dog</span> sandcastle
+        </div>
+      </div>
+      
+      <div class="mb-5">
+        <label for="correctedText" class="block text-sm font-medium mb-2">Correction</label>
+        <textarea id="correctedText" rows="3" class="w-full p-3 border border-neutral-light rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Enter corrected text...">dog's sandcastle</textarea>
+      </div>
+      
+      <div class="mb-5">
+        <label for="annotationType" class="block text-sm font-medium mb-2">Type</label>
+        <select id="annotationType" class="w-full p-3 border border-neutral-light rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+          <option value="grammar">Grammar Error</option>
+          <option value="mispronunciation">Mispronunciation</option>
+          <option value="repetition">Repetition</option>
+          <option value="filler">Filler Word</option>
+        </select>
+      </div>
+      
+      <div class="flex justify-end gap-3">
+        <button id="cancelAnnotation" class="btn btn-secondary py-2 px-4">Cancel</button>
+        <button id="saveAnnotation" class="btn btn-primary py-2 px-4">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Annotation Detail Popup -->
+  <div id="annotationDetailPopup" class="fixed hidden p-3 bg-white rounded-lg shadow-lg z-50" style="min-width: 200px;">
+    <div class="flex justify-between items-center mb-2">
+      <h4 class="text-sm font-medium" id="annotationDetailType">Pause</h4>
+      <button id="closeAnnotationDetail" class="text-neutral-dark hover:text-black text-xs">
+        <i class="material-icons" style="font-size: 16px;">close</i>
+      </button>
+    </div>
+    <div class="text-xs space-y-1">
+      <div class="flex justify-between">
+        <span class="text-neutral-darker">Start:</span>
+        <span id="annotationDetailStart" class="font-medium">00:05.2</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-neutral-darker">End:</span>
+        <span id="annotationDetailEnd" class="font-medium">00:07.2</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-neutral-darker">Duration:</span>
+        <span id="annotationDetailDuration" class="font-medium">2.0s</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add orientation check script just before the closing body tag -->
+  <script>
+    // Function to check device width and show/hide rotate message
+    function checkOrientation() {
+      const rotateOverlay = document.getElementById('rotateDeviceOverlay');
+      // Check if it's a mobile device (likely under 768px) and in portrait orientation (height > width)
+      if (window.innerWidth < 768 && window.innerHeight > window.innerWidth) {
+        rotateOverlay.style.display = 'flex';
+      } else {
+        rotateOverlay.style.display = 'none';
+      }
+    }
+
+    // Check on page load
+    window.addEventListener('load', checkOrientation);
+    
+    // Check when window is resized or orientation changes
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', checkOrientation);
+    
+    // Handle mobile tip banner dismissal
+    document.addEventListener('DOMContentLoaded', function() {
+      // Setup mobile tip banner dismissal
+      const tipBanner = document.getElementById('mobileTipBanner');
+      const closeTipBtn = document.getElementById('closeMobileTip');
+      
+      // Force show the banner if we're on mobile
+      if (window.innerWidth <= 1000) {
+        tipBanner.style.display = 'flex';
+      }
+      
+      if (closeTipBtn && tipBanner) {
+        // Handle the close button click
+        closeTipBtn.addEventListener('click', function() {
+          tipBanner.classList.add('hidden-banner');
+          document.body.classList.remove('has-tip-banner');
+        });
+      }
+      
+      // Setup sidebar toggle functionality
+      const leftSidebar = document.getElementById('leftSidebar');
+      const rightSidebar = document.getElementById('rightSidebar');
+      const toggleLeftBtn = document.getElementById('toggleLeftSidebar');
+      const toggleRightBtn = document.getElementById('toggleRightSidebar');
+      const showLeftBtn = document.getElementById('showLeftSidebar');
+      const showRightBtn = document.getElementById('showRightSidebar');
+      
+      // Left sidebar toggle
+      if (toggleLeftBtn && leftSidebar && showLeftBtn) {
+        toggleLeftBtn.addEventListener('click', function() {
+          leftSidebar.classList.add('hidden');
+          showLeftBtn.classList.remove('hidden');
+          showLeftBtn.classList.add('flex');
+        });
+        
+        showLeftBtn.addEventListener('click', function() {
+          leftSidebar.classList.remove('hidden');
+          showLeftBtn.classList.remove('flex');
+          showLeftBtn.classList.add('hidden');
+        });
+      }
+      
+      // Right sidebar toggle
+      if (toggleRightBtn && rightSidebar && showRightBtn) {
+        toggleRightBtn.addEventListener('click', function() {
+          rightSidebar.classList.add('hidden');
+          showRightBtn.classList.remove('hidden');
+          showRightBtn.classList.add('flex');
+        });
+        
+        showRightBtn.addEventListener('click', function() {
+          rightSidebar.classList.remove('hidden');
+          showRightBtn.classList.remove('flex');
+          showRightBtn.classList.add('hidden');
+        });
+      }
+      
+      // Add control bar toggle functionality
+      const filterButtons = document.querySelectorAll('.annotation-filter');
+      
+      filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const filterType = this.getAttribute('data-type');
+          
+          // If "all" button is clicked, show/hide all highlights
+          if (filterType === 'all') {
+            const isActive = this.classList.contains('active-filter');
+            
+            // Toggle active state on all buttons
+            filterButtons.forEach(btn => {
+              if (isActive) {
+                btn.classList.remove('active-filter');
+                btn.innerHTML = btn.innerHTML.replace('visibility_off', 'visibility');
+              } else {
+                btn.classList.add('active-filter');
+                btn.innerHTML = btn.innerHTML.replace('visibility', 'visibility_off');
+              }
+            });
+            
+            // Toggle visibility of all highlights
+            document.querySelectorAll('.highlight').forEach(highlight => {
+              highlight.style.backgroundColor = isActive ? 'transparent' : '';
+            });
+            
+            return;
+          }
+          
+          // Toggle active state on this button
+          this.classList.toggle('active-filter');
+          
+          // Update icon
+          if (this.classList.contains('active-filter')) {
+            this.innerHTML = this.innerHTML.replace('visibility', 'visibility_off');
+          } else {
+            this.innerHTML = this.innerHTML.replace('visibility_off', 'visibility');
+          }
+          
+          // Toggle visibility of matching highlights
+          document.querySelectorAll(`.highlight-${filterType}`).forEach(highlight => {
+            if (this.classList.contains('active-filter')) {
+              highlight.style.backgroundColor = 'transparent';
+            } else {
+              highlight.style.backgroundColor = '';
+            }
+          });
+        });
+      });
+      
+      // Simulate play/pause functionality
+      const playButton = document.getElementById('playButton');
+      if (playButton) {
+        playButton.addEventListener('click', function() {
+          const icon = this.querySelector('.material-icons');
+          if (icon.textContent === 'play_arrow') {
+            icon.textContent = 'pause';
+          } else {
+            icon.textContent = 'play_arrow';
+          }
+        });
+      }
+    });
+  </script>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html> 

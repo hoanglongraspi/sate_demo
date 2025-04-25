@@ -1,0 +1,348 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom base styles */
+@layer base {
+  body {
+    @apply text-neutral-darkest;
+  }
+  
+  h1, h2, h3, h4 {
+    @apply font-semibold;
+  }
+  
+  button {
+    @apply cursor-pointer border-none outline-none;
+  }
+}
+
+/* Custom components */
+@layer components {
+  .btn {
+    @apply flex items-center justify-center px-3 py-2 rounded text-sm font-medium transition-colors;
+  }
+  
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-primary-dark;
+  }
+  
+  .btn-secondary {
+    @apply bg-neutral-lighter text-neutral-darkest hover:bg-neutral-light;
+  }
+  
+  .btn-danger {
+    @apply bg-red-500 text-white hover:bg-red-600;
+  }
+  
+  .avatar {
+    @apply rounded-full overflow-hidden;
+  }
+  
+  .note-item {
+    @apply py-2.5 px-5 border-b border-neutral-light cursor-pointer hover:bg-neutral-lighter;
+  }
+  
+  .note-item.active {
+    @apply bg-blue-50 border-l-2 border-l-primary;
+  }
+  
+  .message-bubble {
+    @apply p-4 rounded-lg;
+  }
+  
+  .message-bubble.doctor {
+    @apply bg-neutral-lighter;
+  }
+  
+  .message-bubble.patient {
+    @apply bg-blue-50;
+  }
+  
+  .highlight {
+    @apply px-1 py-0.5 rounded;
+  }
+  
+  /* Handle nested highlights */
+  .highlight .highlight {
+    @apply px-0.5 py-0;
+    border-radius: 2px;
+  }
+  
+  .highlight-repetition {
+    @apply bg-issue-repetition/50;
+  }
+  
+  .highlight-grammar {
+    @apply bg-issue-grammar/50;
+  }
+  
+  .highlight-pause {
+    @apply bg-issue-pause/50 inline-block mx-1 text-center;
+  }
+  
+  .highlight-filler {
+    @apply bg-issue-filler/50;
+  }
+  
+  .highlight-stuttering {
+    @apply bg-issue-stuttering/50;
+  }
+  
+  .highlight-mispronunciation {
+    @apply bg-issue-mispronunciation/50;
+  }
+  
+  .issue-tag {
+    @apply px-2.5 py-1 rounded-full text-xs inline-block mr-2 mb-2;
+  }
+  
+  .issue-tag-mispronunciation {
+    @apply bg-issue-mispronunciation text-purple-800;
+  }
+  
+  .issue-tag-grammar {
+    @apply bg-issue-grammar text-green-800;
+  }
+  
+  .issue-tag-pause {
+    @apply bg-issue-pause text-blue-800;
+  }
+  
+  .issue-tag-repetition {
+    @apply bg-issue-repetition text-pink-800;
+  }
+  
+  .issue-tag-filler {
+    @apply bg-issue-filler text-orange-800;
+  }
+  
+  .issue-tag-stuttering {
+    @apply bg-issue-stuttering text-blue-800;
+  }
+  
+  .metric-card {
+    @apply bg-white rounded-lg p-4 text-center shadow-card;
+  }
+  
+  .rate-quality {
+    @apply py-0.5 px-2.5 bg-issue-grammar rounded-full text-green-800 text-xs font-medium inline-block;
+  }
+  
+  .tab {
+    @apply py-2 px-4 cursor-pointer text-sm;
+  }
+  
+  .tab.active {
+    @apply border-b-2 border-primary text-primary font-medium;
+  }
+  
+  .modal-content {
+    @apply bg-white rounded-lg p-6 w-96 shadow-modal;
+  }
+  
+  /* Custom 3D control bar styles */
+  .audio-progress-handle {
+    @apply absolute h-4 w-4 bg-white rounded-full top-1/2 -translate-y-1/2 shadow-md border-2 border-blue-400 cursor-pointer transition-all duration-150;
+  }
+  
+  .audio-progress-handle:hover {
+    @apply shadow-lg transform scale-110;
+    box-shadow: 0 3px 10px rgba(0, 102, 204, 0.4);
+  }
+  
+  .audio-control-bar {
+    transform: translateY(0);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    z-index: 50;
+  }
+  
+  .audio-control-bar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Progress bar animation */
+  @keyframes progress-pulse {
+    0% { opacity: 0.7; }
+    50% { opacity: 1; }
+    100% { opacity: 0.7; }
+  }
+  
+  .audio-progress-indicator {
+    animation: progress-pulse 2s infinite ease-in-out;
+    background: linear-gradient(to right, #1a91ff, #0070d1);
+  }
+  
+  /* Annotation button animation */
+  @keyframes button-pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(22, 101, 52, 0.4); }
+    70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(22, 101, 52, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(22, 101, 52, 0); }
+  }
+  
+  .animate-pulse {
+    animation: button-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  /* Sidebar resize styles */
+  #leftResizeHandle,
+  #rightResizeHandle {
+    opacity: 0;
+    transition: opacity 0.2s ease, background-color 0.2s ease;
+    z-index: 30;
+  }
+  
+  #leftResizeHandle:hover,
+  #rightResizeHandle:hover,
+  #leftResizeHandle.active,
+  #rightResizeHandle.active {
+    opacity: 1;
+  }
+  
+  /* Sidebar transitions */
+  #leftSidebar,
+  #rightSidebar {
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                box-shadow 0.3s ease;
+    overflow: hidden;
+    will-change: width;
+  }
+  
+  /* Add subtle shadow effect when dragging/resizing */
+  #leftSidebar:has(+ #leftResizeHandle.active),
+  #rightSidebar:has(+ #rightResizeHandle.active) {
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Collapsed sidebar styles */
+  .sidebar-collapsed {
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    overflow: hidden !important;
+  }
+  
+  /* Hidden sidebar toggle buttons */
+  #showLeftSidebar,
+  #showRightSidebar {
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: translateX(0);
+    animation: fadeIn 0.3s ease 0.3s forwards;
+  }
+  
+  #showLeftSidebar {
+    left: 10px;
+  }
+  
+  #showRightSidebar {
+    right: 10px;
+  }
+  
+  #showLeftSidebar button,
+  #showRightSidebar button {
+    @apply rounded-full p-2 bg-white shadow-md;
+    transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  #showLeftSidebar button:hover,
+  #showRightSidebar button:hover {
+    @apply bg-blue-50;
+    transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+  }
+  
+  /* Enhanced toggle buttons inside sidebars */
+  #toggleLeftSidebar,
+  #toggleRightSidebar {
+    @apply bg-white rounded-full shadow-sm;
+    opacity: 0.7;
+    transition: all 0.2s ease;
+  }
+  
+  #toggleLeftSidebar:hover,
+  #toggleRightSidebar:hover {
+    opacity: 1;
+    transform: scale(1.1);
+    @apply shadow-md;
+  }
+  
+  /* Better animations */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes slideIn {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  
+  /* Special width-0 state to ensure completely hidden */
+  .w-0 {
+    width: 0 !important;
+    padding: 0 !important;
+    opacity: 0;
+    overflow: hidden;
+  }
+
+  /* Custom cursor for selectable text in patient speech bubbles */
+  .message-bubble.patient {
+    cursor: text;
+    user-select: text;
+  }
+
+  /* Annotate button */
+  #annotateBtn {
+    transition: all 0.2s ease;
+  }
+
+  #annotateBtn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Annotation filter buttons */
+  .annotation-filter {
+    @apply flex items-center transition-all duration-200;
+    border: 1px solid transparent;
+    position: relative;
+    cursor: pointer;
+  }
+  
+  .annotation-filter:hover {
+    @apply transform scale-105 shadow-sm;
+    z-index: 1;
+  }
+  
+  .annotation-filter.filter-active {
+    border: 1px solid currentColor;
+    @apply shadow-md font-medium transform scale-105;
+  }
+  
+  .annotation-filter.filter-active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: currentColor;
+  }
+  
+  .annotation-filter .material-icons {
+    font-size: 14px;
+  }
+  
+  /* Highlight transitions for smooth filtering */
+  .highlight {
+    transition: opacity 0.3s ease, background-color 0.2s ease;
+  }
+  
+  /* Hover effect for highlighted elements */
+  .message-bubble.patient .highlight:hover {
+    filter: brightness(0.95);
+  }
+} 

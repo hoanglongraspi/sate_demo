@@ -1,0 +1,756 @@
+{
+    "segments": [
+      {
+        "start": 3.565,
+        "end": 5.406,
+        "text": " Okay, tell me this story.",
+        "speaker": "Examiner",
+        "words": [
+          {
+            "word": "Okay,",
+            "start": 3.565,
+            "end": 3.725
+          },
+          {
+            "word": "tell",
+            "start": 3.765,
+            "end": 3.905
+          },
+          {
+            "word": "me",
+            "start": 3.925,
+            "end": 4.065
+          },
+          {
+            "word": "this",
+            "start": 4.085,
+            "end": 4.225
+          },
+          {
+            "word": "story.",
+            "start": 4.265,
+            "end": 4.586
+          }
+        ],
+        "pauses": [],
+        "repetitions": [],
+        "fillerwords": [],
+        "mispronunciation": []
+      },
+      {
+        "start": 5.295,
+        "end": 7.715,
+        "text": "um a rabbit .",
+        "speaker": "Child",
+        "words": [
+          {
+            "word": "um",
+            "start": 5.295,
+            "end": 5.586
+          },
+          {
+            "word": "a",
+            "start": 7.248,
+            "end": 7.328
+          },
+          {
+            "word": "rabbit",
+            "start": 7.428,
+            "end": 7.968
+          },
+          {
+            "word": ".",
+            "start": null,
+            "end": null
+          }
+        ],
+        "pauses": [
+          {
+            "start": 5.586,
+            "end": 7.248,
+            "duration": 1.68
+          }
+        ],
+        "repetitions": [],
+        "fillerwords": [
+          {
+            "start": 5.295,
+            "end": 5.586,
+            "content": "um",
+            "duration": 0.291
+          }
+        ],
+        "mispronunciation": []
+      },
+      {
+        "start": 8.555,
+        "end": 13.815,
+        "text": "some help with the um with the dog .",
+        "speaker": "Child",
+        "words": [
+          {
+            "word": "some",
+            "start": 8.555,
+            "end": 9.315
+          },
+          {
+            "word": "help",
+            "start": 9.315,
+            "end": 9.835
+          },
+          {
+            "word": "with",
+            "start": 9.835,
+            "end": 10.215
+          },
+          {
+            "word": "the",
+            "start": 10.215,
+            "end": 10.755
+          },
+          {
+            "word": "um",
+            "start": 10.755,
+            "end": 11.295
+          },
+          {
+            "word": "with",
+            "start": 11.295,
+            "end": 12.315
+          },
+          {
+            "word": "the",
+            "start": 12.315,
+            "end": 13.312
+          },
+          {
+            "word": "dog",
+            "start": 13.992,
+            "end": 14.373
+          },
+          {
+            "word": ".",
+            "start": null,
+            "end": null
+          }
+        ],
+        "pauses": [
+          {
+            "start": 13.312,
+            "end": 13.992,
+            "duration": 0.68
+          }
+        ],
+        "repetitions": [
+          {
+            "content": "with the um with the",
+            "words": [
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        ],
+        "fillerwords": [
+          {
+            "start": 10.755,
+            "end": 11.295,
+            "content": "um",
+            "duration": 0.54
+          }
+        ],
+        "mispronunciation": []
+      },
+      {
+        "start": 15.555,
+        "end": 21.215,
+        "text": "and he wants some help to with me to know how to make a sandcastle .",
+        "speaker": "Child",
+        "words": [
+          {
+            "word": "and",
+            "start": 15.555,
+            "end": 15.695
+          },
+          {
+            "word": "he",
+            "start": 16.574,
+            "end": 16.715
+          },
+          {
+            "word": "wants",
+            "start": 16.715,
+            "end": 17.035
+          },
+          {
+            "word": "some",
+            "start": 17.035,
+            "end": 17.295
+          },
+          {
+            "word": "help",
+            "start": 17.295,
+            "end": 17.675
+          },
+          {
+            "word": "to",
+            "start": 17.675,
+            "end": 18.335
+          },
+          {
+            "word": "with",
+            "start": 18.335,
+            "end": 18.755
+          },
+          {
+            "word": "me",
+            "start": 18.755,
+            "end": 18.995
+          },
+          {
+            "word": "to",
+            "start": 19.395,
+            "end": 19.495
+          },
+          {
+            "word": "know",
+            "start": 19.495,
+            "end": 19.635
+          },
+          {
+            "word": "how",
+            "start": 19.635,
+            "end": 19.855
+          },
+          {
+            "word": "to",
+            "start": 19.855,
+            "end": 20.075
+          },
+          {
+            "word": "make",
+            "start": 20.075,
+            "end": 20.415
+          },
+          {
+            "word": "a",
+            "start": 20.415,
+            "end": 20.715
+          },
+          {
+            "word": "sandcastle",
+            "start": 20.715,
+            "end": 21.215
+          },
+          {
+            "word": ".",
+            "start": null,
+            "end": null
+          }
+        ],
+        "pauses": [
+          {
+            "start": 15.695,
+            "end": 16.574,
+            "duration": 0.879
+          },
+          {
+            "start": 18.995,
+            "end": 19.395,
+            "duration": 0.4
+          }
+        ],
+        "repetitions": [],
+        "fillerwords": [],
+        "mispronunciation": []
+      },
+      {
+        "start": 25.305,
+        "end": 28.745,
+        "text": "and he um the rabbit make a sandcastle .",
+        "speaker": "Child",
+        "words": [
+          {
+            "word": "and",
+            "start": 25.305,
+            "end": 25.545
+          },
+          {
+            "word": "he",
+            "start": 25.545,
+            "end": 25.745
+          },
+          {
+            "word": "um",
+            "start": 25.745,
+            "end": 26.485
+          },
+          {
+            "word": "the",
+            "start": 26.485,
+            "end": 26.725
+          },
+          {
+            "word": "rabbit",
+            "start": 26.725,
+            "end": 27.125
+          },
+          {
+            "word": "make",
+            "start": 27.125,
+            "end": 27.705
+          },
+          {
+            "word": "a",
+            "start": 27.705,
+            "end": 28.245
+          },
+          {
+            "word": "sandcastle",
+            "start": 28.245,
+            "end": 28.745
+          },
+          {
+            "word": ".",
+            "start": null,
+            "end": null
+          }
+        ],
+        "pauses": [],
+        "repetitions": [],
+        "fillerwords": [
+          {
+            "start": 25.745,
+            "end": 26.485,
+            "content": "um",
+            "duration": 0.74
+          }
+        ],
+        "mispronunciation": []
+      },
+      {
+        "start": 30.545,
+        "end": 41.005,
+        "text": "and the rabbit dump all the sand to the the sandcastle .",
+        "speaker": "Child",
+        "words": [
+          {
+            "word": "and",
+            "start": 30.545,
+            "end": 32.305
+          },
+          {
+            "word": "the",
+            "start": 33.305,
+            "end": 34.845
+          },
+          {
+            "word": "rabbit",
+            "start": 34.845,
+            "end": 35.325
+          },
+          {
+            "word": "dump",
+            "start": 35.325,
+            "end": 35.825
+          },
+          {
+            "word": "all",
+            "start": 35.825,
+            "end": 36.345
+          },
+          {
+            "word": "the",
+            "start": 36.345,
+            "end": 36.765
+          },
+          {
+            "word": "sand",
+            "start": 36.765,
+            "end": 37.225
+          },
+          {
+            "word": "to",
+            "start": 37.225,
+            "end": 37.865
+          },
+          {
+            "word": "the",
+            "start": 37.865,
+            "end": 38.925
+          },
+          {
+            "word": "the",
+            "start": 39.525,
+            "end": 40.505
+          },
+          {
+            "word": "sandcastle",
+            "start": 40.505,
+            "end": 41.005
+          },
+          {
+            "word": ".",
+            "start": null,
+            "end": null
+          }
+        ],
+        "pauses": [
+          {
+            "start": 32.305,
+            "end": 33.305,
+            "duration": 1
+          },
+          {
+            "start": 38.925,
+            "end": 39.525,
+            "duration": 0.6
+          }
+        ],
+        "repetitions": [
+          {
+            "content": "the the",
+            "words": [
+              8,
+              9
+            ]
+          }
+        ],
+        "fillerwords": [],
+        "mispronunciation": []
+      },
+      {
+        "start": 43.715,
+        "end": 54.035,
+        "text": "and he is he that accidentally um broke his the dog's the dog sandcastle .",
+        "speaker": "Child",
+        "words": [
+          {
+            "word": "and",
+            "start": 43.715,
+            "end": 43.935
+          },
+          {
+            "word": "he",
+            "start": 44.535,
+            "end": 45.055
+          },
+          {
+            "word": "is",
+            "start": 45.055,
+            "end": 45.555
+          },
+          {
+            "word": "he",
+            "start": 45.555,
+            "end": 46.075
+          },
+          {
+            "word": "that",
+            "start": 46.075,
+            "end": 46.555
+          },
+          {
+            "word": "accidentally",
+            "start": 46.555,
+            "end": 47.995
+          },
+          {
+            "word": "um",
+            "start": 47.995,
+            "end": 48.415
+          },
+          {
+            "word": "broke",
+            "start": 49.115,
+            "end": 50.055
+          },
+          {
+            "word": "his",
+            "start": 50.055,
+            "end": 51.155
+          },
+          {
+            "word": "the",
+            "start": 51.155,
+            "end": 51.695
+          },
+          {
+            "word": "dog's",
+            "start": 51.695,
+            "end": 52.315
+          },
+          {
+            "word": "the",
+            "start": 52.815,
+            "end": 53.115
+          },
+          {
+            "word": "dog",
+            "start": 53.115,
+            "end": 53.535
+          },
+          {
+            "word": "sandcastle",
+            "start": 54.138,
+            "end": 55.535
+          },
+          {
+            "word": ".",
+            "start": null,
+            "end": null
+          }
+        ],
+        "pauses": [
+          {
+            "start": 43.935,
+            "end": 44.535,
+            "duration": 0.6
+          },
+          {
+            "start": 48.415,
+            "end": 49.115,
+            "duration": 0.7
+          },
+          {
+            "start": 52.315,
+            "end": 52.814,
+            "duration": 0.49
+          },
+          {
+            "start": 53.535,
+            "end": 54.138,
+            "duration": 0.63
+          }
+        ],
+        "repetitions": [
+          {
+            "content": "he is he",
+            "words": [
+              1,
+              2,
+              3
+            ]
+          },
+          {
+            "content": "the dog's the dog",
+            "words": [
+              9,
+              10,
+              11,
+              12
+            ]
+          }
+        ],
+        "fillerwords": [
+          {
+            "start": 47.995,
+            "end": 48.415,
+            "content": "um",
+            "duration": 0.42
+          }
+        ],
+        "mispronunciation": [
+          {
+            "content": "accidentally",
+            "start": 46.555,
+            "end": 47.995
+          }
+        ]
+      },
+      {
+        "start": 58.075,
+        "end": 64.815,
+        "text": "and he the dog never um make a sandcastle .",
+        "speaker": "Child",
+        "words": [
+          {
+            "word": "and",
+            "start": 58.075,
+            "end": 58.475
+          },
+          {
+            "word": "he",
+            "start": 59.175,
+            "end": 59.435
+          },
+          {
+            "word": "the",
+            "start": 60.437,
+            "end": 61.355
+          },
+          {
+            "word": "dog",
+            "start": 61.355,
+            "end": 61.875
+          },
+          {
+            "word": "never",
+            "start": 61.875,
+            "end": 62.615
+          },
+          {
+            "word": "um",
+            "start": 62.615,
+            "end": 63.235
+          },
+          {
+            "word": "make",
+            "start": 63.235,
+            "end": 64.055
+          },
+          {
+            "word": "a",
+            "start": 64.055,
+            "end": 64.315
+          },
+          {
+            "word": "sandcastle",
+            "start": 64.315,
+            "end": 64.815
+          },
+          {
+            "word": ".",
+            "start": null,
+            "end": null
+          }
+        ],
+        "pauses": [
+          {
+            "start": 58.475,
+            "end": 59.17,
+            "duration": 0.65
+          },
+          {
+            "start": 59.435,
+            "end": 60.437,
+            "duration": 1.002
+          }
+        ],
+        "repetitions": [],
+        "fillerwords": [
+          {
+            "start": 62.615,
+            "end": 63.235,
+            "content": "um",
+            "duration": 0.62
+          }
+        ],
+        "mispronunciation": []
+      },
+      {
+        "start": 65.595,
+        "end": 66.435,
+        "text": "and he cried .",
+        "speaker": "Child",
+        "words": [
+          {
+            "word": "and",
+            "start": 65.595,
+            "end": 65.655
+          },
+          {
+            "word": "he",
+            "start": 65.655,
+            "end": 65.935
+          },
+          {
+            "word": "cried",
+            "start": 65.935,
+            "end": 66.435
+          },
+          {
+            "word": ".",
+            "start": null,
+            "end": null
+          }
+        ],
+        "pauses": [],
+        "repetitions": [],
+        "fillerwords": [],
+        "mispronunciation": []
+      },
+      {
+        "start": 67.355,
+        "end": 72.975,
+        "text": "and there bunny rabbit um be sorry that he .",
+        "speaker": "Child",
+        "words": [
+          {
+            "word": "and",
+            "start": 67.355,
+            "end": 67.415
+          },
+          {
+            "word": "there",
+            "start": 67.415,
+            "end": 67.995
+          },
+          {
+            "word": "bunny",
+            "start": 67.995,
+            "end": 68.495
+          },
+          {
+            "word": "rabbit",
+            "start": 68.495,
+            "end": 69.075
+          },
+          {
+            "word": "um",
+            "start": 69.763,
+            "end": 70.535
+          },
+          {
+            "word": "be",
+            "start": 71.132,
+            "end": 71.635
+          },
+          {
+            "word": "sorry",
+            "start": 71.635,
+            "end": 72.095
+          },
+          {
+            "word": "that",
+            "start": 72.095,
+            "end": 72.475
+          },
+          {
+            "word": "he",
+            "start": 72.475,
+            "end": 72.975
+          },
+          {
+            "word": ".",
+            "start": null,
+            "end": null
+          }
+        ],
+        "pauses": [
+          {
+            "start": 69.075,
+            "end": 69.763,
+            "duration": 0.688
+          },
+          {
+            "start": 70.535,
+            "end": 71.132,
+            "duration": 0.597
+          }
+        ],
+        "repetitions": [],
+        "fillerwords": [
+          {
+            "start": 69.763,
+            "end": 70.535,
+            "content": "um",
+            "duration": 0.772
+          }
+        ],
+        "mispronunciation": []
+      }
+    ]
+  }
