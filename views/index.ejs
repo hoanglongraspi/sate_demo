@@ -522,40 +522,116 @@
     }
     
     /* Active state for filter buttons */
+    .annotation-filter {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      transition: all 0.2s ease;
+      border-width: 1px;
+      border-style: solid;
+      background-color: transparent;
+    }
+
+    .annotation-filter:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
     .annotation-filter.active-filter {
-      background-color: rgba(0, 0, 0, 0.07) !important;
       font-weight: 500 !important;
+      border-color: transparent !important;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transform: translateY(-1px);
     }
-    
+
     /* Color-specific active states for better visual feedback */
-    .annotation-filter[data-type="pause"].active-filter {
-      background-color: rgba(59, 130, 246, 0.15) !important;
+    .annotation-filter[data-type="pause"] {
       color: #1e40af !important;
+      border-color: #3b82f6 !important;
     }
-    
-    .annotation-filter[data-type="filler"].active-filter {
-      background-color: rgba(249, 115, 22, 0.15) !important;
+
+    .annotation-filter[data-type="pause"].active-filter {
+      background-color: #3b82f6 !important;
+      color: white !important;
+    }
+
+    .annotation-filter[data-type="filler"] {
       color: #9a3412 !important;
+      border-color: #f97316 !important;
     }
-    
-    .annotation-filter[data-type="repetition"].active-filter {
-      background-color: rgba(245, 158, 11, 0.15) !important;
+
+    .annotation-filter[data-type="filler"].active-filter {
+      background-color: #f97316 !important;
+      color: white !important;
+    }
+
+    .annotation-filter[data-type="repetition"] {
       color: #92400e !important;
+      border-color: #f59e0b !important;
     }
-    
-    .annotation-filter[data-type="mispronunciation"].active-filter {
-      background-color: rgba(168, 85, 247, 0.15) !important;
+
+    .annotation-filter[data-type="repetition"].active-filter {
+      background-color: #f59e0b !important;
+      color: white !important;
+    }
+
+    .annotation-filter[data-type="mispronunciation"] {
       color: #6b21a8 !important;
+      border-color: #a855f7 !important;
     }
-    
-    .annotation-filter[data-type="grammar"].active-filter {
-      background-color: rgba(16, 185, 129, 0.15) !important;
+
+    .annotation-filter[data-type="mispronunciation"].active-filter {
+      background-color: #a855f7 !important;
+      color: white !important;
+    }
+
+    .annotation-filter[data-type="grammar"] {
       color: #065f46 !important;
+      border-color: #10b981 !important;
+    }
+
+    .annotation-filter[data-type="grammar"].active-filter {
+      background-color: #10b981 !important;
+      color: white !important;
+    }
+
+    .annotation-filter[data-type="all"] {
+      color: #1f2937 !important;
+      border-color: #6b7280 !important;
+    }
+
+    .annotation-filter[data-type="all"].active-filter {
+      background-color: #6b7280 !important;
+      color: white !important;
     }
     
-    .annotation-filter[data-type="all"].active-filter {
-      background-color: rgba(107, 114, 128, 0.15) !important;
-      color: #1f2937 !important;
+    /* Morpheme filter styles */
+    .annotation-filter[data-type="morpheme"] {
+      color: #166534 !important;
+      border-color: #22c55e !important;
+    }
+
+    .annotation-filter[data-type="morpheme"].active-filter {
+      background-color: #22c55e !important;
+      color: white !important;
+    }
+    
+    /* Highlight styles for morphemes */
+    .highlight-morpheme {
+      background-color: transparent;
+      border-radius: 0;
+      padding: 0;
+      margin: 0;
+      position: relative;
+      cursor: pointer;
+      color: #166534;
+      text-decoration: underline;
+      text-decoration-color: #22c55e;
+      text-decoration-style: dashed;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 2px;
     }
     
     /* Progress handle improvement */
@@ -724,6 +800,21 @@
     .flex-1.overflow-y-auto.px-6 {
       padding-bottom: 120px !important; /* Add padding to prevent content being hidden behind the control bar */
     }
+    
+    /* Morpheme popup styling */
+    #morphemeDetailPopup {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      border: 1px solid #e5e7eb;
+    }
+    
+    #morphemeDetailPopup.show {
+      opacity: 1;
+      display: block;
+    }
+    
+    /* Progress handle improvement */
   </style>
 </head>
 <body class="bg-neutral-lightest has-tip-banner">
@@ -881,7 +972,7 @@
               <div class="relative mb-3 full-width">
                 <div class="message-bubble patient">
                   <span class="word-timestamp" data-timestamp="15.555:15.695">and</span> 
-                  <span class="highlight highlight-pause pause3" data-timestamp="15.695:16.574" data-type="pause" data-duration="0.879">...</span> <span class="word-timestamp" data-timestamp="16.574:16.715">he</span> <span class="word-timestamp" data-timestamp="16.715:17.035">wants</span> <span class="word-timestamp" data-timestamp="17.035:17.295">some</span> 
+                  <span class="highlight highlight-pause pause3" data-timestamp="15.695:16.574" data-type="pause" data-duration="0.879">...</span> <span class="word-timestamp" data-timestamp="16.574:16.715">he</span> <span class="highlight highlight-morpheme morpheme1 word-timestamp" data-timestamp="16.715:17.035" data-type="morpheme" data-base="want" data-suffix="-s" data-category="3rd person singular">wants</span> <span class="word-timestamp" data-timestamp="17.035:17.295">some</span> 
                   <span class="word-timestamp" data-timestamp="17.295:17.675">help</span> <span class="word-timestamp" data-timestamp="17.675:18.335">to</span> <span class="word-timestamp" data-timestamp="18.335:18.755">with</span> <span class="word-timestamp" data-timestamp="18.755:18.995">me</span><span class="highlight highlight-pause pause4" data-timestamp="18.995:19.395" data-type="pause" data-duration="0.4">...</span>
                   <span class="word-timestamp" data-timestamp="19.395:19.495">to</span> <span class="word-timestamp" data-timestamp="19.495:19.635">know</span> <span class="word-timestamp" data-timestamp="19.635:19.855">how</span> <span class="word-timestamp" data-timestamp="19.855:20.075">to</span> <span class="word-timestamp" data-timestamp="20.075:20.415">make</span> <span class="word-timestamp" data-timestamp="20.415:20.715">a</span> 
                   <span class="word-timestamp" data-timestamp="20.715:21.215">sandcastle</span> .
@@ -922,7 +1013,7 @@
                 <div class="message-bubble patient">
                   <span class="word-timestamp" data-timestamp="43.715:43.935">and</span>
                   <span class="highlight highlight-pause pause7" data-timestamp="43.935:44.535" data-type="pause" data-duration="0.6">...</span><span class="highlight highlight-repetition repetition3" data-timestamp="44.535:46.075" data-type="repetition"><span class="word-timestamp" data-timestamp="44.535:45.055">he</span> <span class="word-timestamp" data-timestamp="45.055:45.555">is</span> <span class="word-timestamp" data-timestamp="45.555:46.075">he</span></span> <span class="word-timestamp" data-timestamp="46.075:46.555">that</span> <span class="highlight highlight-mispronunciation mispronunciation1" data-timestamp="46.555:47.995" data-type="mispronunciation">accidentally</span> 
-                  <span class="highlight highlight-filler filler4" data-timestamp="47.995:48.415" data-type="filler">um</span><span class="highlight highlight-pause pause8" data-timestamp="48.415:49.115" data-type="pause" data-duration="0.7">...</span><span class="word-timestamp" data-timestamp="49.115:50.055">broke</span> <span class="word-timestamp" data-timestamp="50.055:51.155">his</span> <span class="highlight highlight-repetition repetition4" data-timestamp="51.155:53.535" data-type="repetition"><span class="word-timestamp" data-timestamp="51.155:51.695">the</span> <span class="word-timestamp" data-timestamp="51.695:52.315">dog's</span> <span class="highlight highlight-pause pause9" data-timestamp="52.315:52.814" data-type="pause" data-duration="0.499">...</span><span class="word-timestamp" data-timestamp="52.815:53.115">the</span> <span class="word-timestamp" data-timestamp="53.115:53.535">dog</span></span> 
+                  <span class="highlight highlight-filler filler4" data-timestamp="47.995:48.415" data-type="filler">um</span><span class="highlight highlight-pause pause8" data-timestamp="48.415:49.115" data-type="pause" data-duration="0.7">...</span><span class="word-timestamp" data-timestamp="49.115:50.055">broke</span> <span class="word-timestamp" data-timestamp="50.055:51.155">his</span> <span class="highlight highlight-repetition repetition4" data-timestamp="51.155:53.535" data-type="repetition"><span class="word-timestamp" data-timestamp="51.155:51.695">the</span> <span class="highlight highlight-morpheme morpheme2 word-timestamp" data-timestamp="51.695:52.315" data-type="morpheme" data-base="dog" data-suffix="'s" data-category="possessive">dog's</span> <span class="highlight highlight-pause pause9" data-timestamp="52.315:52.814" data-type="pause" data-duration="0.499">...</span><span class="word-timestamp" data-timestamp="52.815:53.115">the</span> <span class="word-timestamp" data-timestamp="53.115:53.535">dog</span></span> 
                   <span class="highlight highlight-pause pause10" data-timestamp="53.535:54.138" data-type="pause" data-duration="0.603">...</span><span class="word-timestamp" data-timestamp="54.138:55.535">sandcastle</span> .
                 </div>
               </div>
@@ -938,7 +1029,7 @@
               <!-- Eighth sentence -->
               <div class="relative mb-3 full-width">
                 <div class="message-bubble patient">
-                  <span class="word-timestamp" data-timestamp="65.595:65.655">and</span> <span class="word-timestamp" data-timestamp="65.655:65.935">he</span> <span class="word-timestamp" data-timestamp="65.935:66.435">cried</span> .
+                  <span class="word-timestamp" data-timestamp="65.595:65.655">and</span> <span class="word-timestamp" data-timestamp="65.655:65.935">he</span> <span class="highlight highlight-morpheme morpheme3 word-timestamp" data-timestamp="65.935:66.435" data-type="morpheme" data-base="cry" data-suffix="'ed" data-category="past tense">cried</span> .
                 </div>
               </div>
               
@@ -1008,27 +1099,31 @@
               
               <!-- Tags -->
               <div class="flex flex-wrap gap-1 annotation-filters">
-                <button class="px-3 py-1 rounded-full text-xs text-purple-900 border border-purple-500 bg-transparent hover:bg-purple-100 transition-colors annotation-filter" data-type="mispronunciation">
+                <button class="annotation-filter" data-type="mispronunciation">
                   <i class="material-icons text-xs mr-1 align-text-top">visibility</i>
                   Mispronunciation
                 </button>
-                <button class="px-3 py-1 rounded-full text-xs text-blue-900 border border-blue-500 bg-transparent hover:bg-blue-100 transition-colors annotation-filter" data-type="pause">
+                <button class="annotation-filter" data-type="pause">
                   <i class="material-icons text-xs mr-1 align-text-top">visibility</i>
                   Pauses
                 </button>
-                <button class="px-3 py-1 rounded-full text-xs text-amber-700 border border-amber-500 bg-transparent hover:bg-amber-100 transition-colors annotation-filter" data-type="grammar">
+                <button class="annotation-filter" data-type="grammar">
                   <i class="material-icons text-xs mr-1 align-text-top">visibility</i>
                   Grammar
                 </button>
-                <button class="px-3 py-1 rounded-full text-xs text-amber-900 border border-amber-500 bg-transparent hover:bg-amber-100 transition-colors annotation-filter" data-type="repetition">
+                <button class="annotation-filter" data-type="repetition">
                   <i class="material-icons text-xs mr-1 align-text-top">visibility</i>
                   Repetition
                 </button>
-                <button class="px-3 py-1 rounded-full text-xs text-orange-900 border border-orange-500 bg-transparent hover:bg-orange-100 transition-colors annotation-filter" data-type="filler">
+                <button class="annotation-filter" data-type="filler">
                   <i class="material-icons text-xs mr-1 align-text-top">visibility</i>
                   Filler words
                 </button>
-                <button class="px-3 py-1 rounded-full text-xs text-gray-900 border border-gray-500 bg-transparent hover:bg-gray-100 transition-colors annotation-filter" data-type="all">
+                <button class="annotation-filter" data-type="morpheme">
+                  <i class="material-icons text-xs mr-1 align-text-top">visibility</i>
+                  Morphemes
+                </button>
+                <button class="annotation-filter" data-type="all">
                   <i class="material-icons text-xs mr-1 align-text-top">visibility</i>
                   All
                 </button>
@@ -1093,6 +1188,14 @@
                   <div class="h-full bg-amber-400 rounded-full" style="width: 25%"></div>
                 </div>
                 <div class="text-sm font-medium">4</div>
+              </div>
+              
+              <div class="flex items-center">
+                <div class="w-24 text-sm">Morphemes</div>
+                <div class="flex-1 h-2.5 bg-neutral-lighter rounded-full mr-2 overflow-hidden">
+                  <div class="h-full bg-indigo-400 rounded-full" style="width: 15%"></div>
+                </div>
+                <div class="text-sm font-medium">3</div>
               </div>
             </div>
           </div>
@@ -1176,6 +1279,20 @@
                     Words that were pronounced incorrectly
                   </div>
                 </div>
+
+                <!-- Morphemes -->
+                <div class="issue-summary-item hover:bg-indigo-50 border border-transparent hover:border-indigo-100 rounded-lg transition-all">
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center">
+                      <div class="w-3 h-3 bg-indigo-400 rounded-full mr-2"></div>
+                      <span class="font-medium text-indigo-800">Morphemes</span>
+                    </div>
+                    <div class="text-lg font-bold text-indigo-700 bg-indigo-50 px-3 py-0.5 rounded-full">3</div>
+                  </div>
+                  <div class="text-xs text-neutral-darker">
+                    Bound morphemes (prefixes and suffixes) identified in words
+                  </div>
+                </div>
               </div>
             </div>
             
@@ -1254,6 +1371,37 @@
       <div class="flex justify-end gap-3">
         <button id="cancelAnnotation" class="btn btn-secondary py-2 px-4">Cancel</button>
         <button id="saveAnnotation" class="btn btn-primary py-2 px-4">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Morpheme Annotation Detail Popup -->
+  <div id="morphemeDetailPopup" class="fixed hidden p-4 bg-white rounded-lg shadow-lg z-50" style="min-width: 320px;">
+    <div class="flex justify-between items-center mb-3">
+      <h4 class="text-sm font-medium">Inflectional morpheme</h4>
+      <button id="closeMorphemeDetail" class="text-neutral-dark hover:text-black text-xs">
+        <i class="material-icons" style="font-size: 16px;">close</i>
+      </button>
+    </div>
+    <div class="flex flex-col space-y-3">
+      <div class="flex gap-4 justify-center mb-1">
+        <div class="py-2 px-6 bg-green-100 rounded text-center text-green-800 border border-green-200">
+          <span id="morphemeBaseWord" class="font-medium">want</span>
+        </div>
+        <div class="py-2 px-6 bg-red-100 rounded text-center text-red-800 border border-red-200">
+          <span id="morphemeSuffix" class="font-medium">-s</span>
+        </div>
+      </div>
+      <div class="text-sm text-center font-medium py-1 mb-2" id="morphemeCategory">
+        3rd person singular
+      </div>
+      <div class="flex justify-between text-xs text-neutral-darker">
+        <span>Start:</span>
+        <span id="morphemeStart" class="font-medium">16.715</span>
+      </div>
+      <div class="flex justify-between text-xs text-neutral-darker">
+        <span>End:</span>
+        <span id="morphemeEnd" class="font-medium">17.035</span>
       </div>
     </div>
   </div>
@@ -1421,6 +1569,74 @@
             icon.textContent = 'play_arrow';
           }
         });
+      }
+    });
+    
+    // Add morpheme detail popup functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const morphemeDetailPopup = document.getElementById('morphemeDetailPopup');
+      const morphemeBaseWord = document.getElementById('morphemeBaseWord');
+      const morphemeSuffix = document.getElementById('morphemeSuffix');
+      const morphemeCategory = document.getElementById('morphemeCategory');
+      const morphemeStart = document.getElementById('morphemeStart');
+      const morphemeEnd = document.getElementById('morphemeEnd');
+      const closeMorphemeDetail = document.getElementById('closeMorphemeDetail');
+      
+      // Close morpheme popup when clicking the close button
+      closeMorphemeDetail && closeMorphemeDetail.addEventListener('click', hideMorphemeDetailPopup);
+      
+      // Close popup when clicking outside
+      document.addEventListener('click', function(e) {
+        if (morphemeDetailPopup &&
+            !morphemeDetailPopup.contains(e.target) &&
+            !e.target.classList.contains('highlight-morpheme')) {
+          hideMorphemeDetailPopup();
+        }
+      });
+      
+      // Show morpheme detail popup when clicking on a morpheme
+      document.querySelectorAll('.highlight-morpheme').forEach(morpheme => {
+        morpheme.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          const base = this.getAttribute('data-base');
+          const suffix = this.getAttribute('data-suffix');
+          const category = this.getAttribute('data-category');
+          const timestampData = this.getAttribute('data-timestamp').split(':');
+          const start = parseFloat(timestampData[0]);
+          const end = parseFloat(timestampData[1]);
+          
+          morphemeBaseWord.textContent = base;
+          morphemeSuffix.textContent = suffix;
+          morphemeCategory.textContent = category;
+          morphemeStart.textContent = start.toFixed(3);
+          morphemeEnd.textContent = end.toFixed(3);
+          
+          // Position the popup
+          const rect = this.getBoundingClientRect();
+          morphemeDetailPopup.style.top = `${rect.bottom + window.scrollY + 8}px`;
+          morphemeDetailPopup.style.left = `${rect.left + window.scrollX}px`;
+          
+          // Show the popup
+          morphemeDetailPopup.classList.remove('hidden');
+          morphemeDetailPopup.classList.add('show');
+        });
+      });
+      
+      // Exclude morphemes from the general highlight popup system
+      const morphemes = document.querySelectorAll('.highlight-morpheme');
+      morphemes.forEach(morpheme => {
+        morpheme.addEventListener('mouseover', function(e) {
+          e.stopPropagation();
+        });
+      });
+      
+      function hideMorphemeDetailPopup() {
+        if (morphemeDetailPopup) {
+          morphemeDetailPopup.classList.remove('show');
+          morphemeDetailPopup.classList.add('hidden');
+        }
       }
     });
   </script>

@@ -103,8 +103,7 @@ closeAnnotationDetail && closeAnnotationDetail.addEventListener('click', hideAnn
 document.addEventListener('click', (e) => {
   if (annotationDetailPopup && 
       !annotationDetailPopup.contains(e.target) && 
-      !e.target.classList.contains('highlight') &&
-      !e.target.closest('.highlight-morpheme')) {
+      !e.target.classList.contains('highlight')) {
     hideAnnotationDetailPopup();
   }
 });
@@ -116,9 +115,6 @@ function showAnnotationDetailPopup(e) {
   // Get highlight element and its data
   const highlight = e.currentTarget || e.target;
   if (!highlight) return;
-  
-  // Skip morpheme highlights as they have their own popup
-  if (highlight.classList.contains('highlight-morpheme')) return;
   
   const type = highlight.getAttribute('data-type');
   const timestampData = highlight.getAttribute('data-timestamp');
@@ -182,21 +178,12 @@ function hideAnnotationDetailPopup() {
 
 // Function to attach annotation click handlers
 function attachAnnotationClickHandlers() {
-  console.log("Attaching annotation click handlers");
-  
   // Make sure to query all highlight elements across all patient bubbles
-  // Exclude morpheme highlights as they have their own popup system
-  const highlights = document.querySelectorAll('.message-bubble.patient .highlight:not(.highlight-morpheme)');
-  console.log(`Found ${highlights.length} highlights to attach handlers to`);
-  
-  highlights.forEach(highlight => {
+  document.querySelectorAll('.message-bubble.patient .highlight').forEach(highlight => {
     // Remove any existing listeners to prevent duplicates
     highlight.removeEventListener('click', handleHighlightClick);
-    // Add new listener
     highlight.addEventListener('click', handleHighlightClick);
   });
-  
-  console.log("Annotation click handlers attached successfully");
 }
 
 // Separate function to handle highlight clicks
@@ -231,91 +218,48 @@ function handleAnnotationFilter(e) {
   
   // Get all filter buttons for consistent reference
   const filterBtns = document.querySelectorAll('.annotation-filter');
-  
-  // Get the icon in this button
-  const icon = this.querySelector('.material-icons');
-  const buttonText = this.textContent.trim().replace('visibility', '').replace('visibility_on', '').replace('visibility_off', '').trim();
 
   // Handle "All" button
   if (filterValue === 'all') {
-    // Toggle between show all and hide all
-    if (activeAnnotationFilters.includes('all')) {
-      // Currently showing all, switch to hiding all
-      activeAnnotationFilters = ['hide_all'];
-      
-      // Update button text and icon
-      if (icon) icon.textContent = 'visibility_off';
-      this.setAttribute('data-original-text', buttonText);
-      this.textContent = '';
-      this.appendChild(icon);
-      this.appendChild(document.createTextNode(' Hide All'));
-      
-      // Update all other filter buttons to show as inactive (eye closed)
-      filterBtns.forEach(btn => {
-        if (btn.getAttribute('data-type') !== 'all') {
-          btn.classList.remove('active-filter');
-          const btnIcon = btn.querySelector('.material-icons');
-          if (btnIcon) btnIcon.textContent = 'visibility_off';
-        }
-      });
-    } else {
-      // Currently hiding all or showing specific filters, switch to showing all
-      activeAnnotationFilters = ['all'];
-      
-      // Update button text and icon
-      if (icon) icon.textContent = 'visibility';
-      this.textContent = '';
-      this.appendChild(icon);
-      this.appendChild(document.createTextNode(' Show All'));
-      
-      // Update all other filter buttons to show as inactive but with open eyes
-      filterBtns.forEach(btn => {
-        if (btn.getAttribute('data-type') !== 'all') {
-          btn.classList.remove('active-filter');
-          const btnIcon = btn.querySelector('.material-icons');
-          if (btnIcon) btnIcon.textContent = 'visibility';
-        }
-      });
-    }
+    // Deactivate all other filters
+    filterBtns.forEach(btn => {
+      if (btn.getAttribute('data-type') !== 'all') {
+        btn.classList.remove('active-filter');
+        // Update icon state
+        const icon = btn.querySelector('.material-icons');
+        if (icon) icon.textContent = 'visibility';
+      }
+    });
     
-    // Always make the All button active
+    // Activate only the "All" button
     this.classList.add('active-filter');
+    const icon = this.querySelector('.material-icons');
+    if (icon) icon.textContent = 'visibility_on';
     
-    console.log('All filter toggled, active filters:', activeAnnotationFilters);
+    // Set activeAnnotationFilters to include only 'all'
+    activeAnnotationFilters = ['all'];
+    console.log('All filters activated, filters array:', activeAnnotationFilters);
   } else {
     // Get the "All" filter button
     const allFilterBtn = document.querySelector('.annotation-filter[data-type="all"]');
     
-    // Remove "All" and "hide_all" from active filters if they exist
-    if (activeAnnotationFilters.includes('all') || activeAnnotationFilters.includes('hide_all')) {
+    // Remove "All" from active filters if it exists
+    if (activeAnnotationFilters.includes('all')) {
       activeAnnotationFilters = [];
       if (allFilterBtn) {
         allFilterBtn.classList.remove('active-filter');
         const allIcon = allFilterBtn.querySelector('.material-icons');
         if (allIcon) allIcon.textContent = 'visibility';
-        
-        // Reset All button text
-        allFilterBtn.textContent = '';
-        allFilterBtn.appendChild(allIcon);
-        allFilterBtn.appendChild(document.createTextNode(' Show All'));
       }
-      
-      // Set all individual filter buttons to have closed eyes initially
-      filterBtns.forEach(btn => {
-        if (btn.getAttribute('data-type') !== 'all' && btn !== this) {
-          const btnIcon = btn.querySelector('.material-icons');
-          if (btnIcon) btnIcon.textContent = 'visibility_off';
-          btn.classList.remove('active-filter');
-        }
-      });
     }
 
     // Toggle this filter button
     this.classList.toggle('active-filter');
+    const icon = this.querySelector('.material-icons');
     
     if (this.classList.contains('active-filter')) {
       // Update icon state
-      if (icon) icon.textContent = 'visibility';
+      if (icon) icon.textContent = 'visibility_on';
       
       // Add to active filters if not already present
       if (!activeAnnotationFilters.includes(filterValue)) {
@@ -323,7 +267,7 @@ function handleAnnotationFilter(e) {
       }
     } else {
       // Update icon state
-      if (icon) icon.textContent = 'visibility_off';
+      if (icon) icon.textContent = 'visibility';
       
       // Remove from active filters
       activeAnnotationFilters = activeAnnotationFilters.filter(filter => filter !== filterValue);
@@ -333,17 +277,8 @@ function handleAnnotationFilter(e) {
     if (activeAnnotationFilters.length === 0 && allFilterBtn) {
       allFilterBtn.classList.add('active-filter');
       const allIcon = allFilterBtn.querySelector('.material-icons');
-      if (allIcon) allIcon.textContent = 'visibility';
+      if (allIcon) allIcon.textContent = 'visibility_on';
       activeAnnotationFilters = ['all'];
-      
-      // Reset all other buttons to show visibility icon
-      filterBtns.forEach(btn => {
-        if (btn.getAttribute('data-type') !== 'all') {
-          const btnIcon = btn.querySelector('.material-icons');
-          if (btnIcon) btnIcon.textContent = 'visibility';
-          btn.classList.remove('active-filter');
-        }
-      });
     }
     
     console.log('Active filters updated:', activeAnnotationFilters);
@@ -365,176 +300,6 @@ function applyFiltersToDocument() {
   messageBubbles.forEach(bubble => {
     applyFilters(bubble);
   });
-  
-  // Update visibility indicators in the control bar
-  updateAnnotationVisibilityIndicators();
-}
-
-// Function to update annotation visibility indicators in the control bar
-function updateAnnotationVisibilityIndicators() {
-  // Check if we're hiding all annotations
-  const hideAll = activeAnnotationFilters.includes('hide_all');
-  const showAll = activeAnnotationFilters.includes('all');
-  
-  // Get all message bubbles
-  const messageBubbles = document.querySelectorAll('.message-bubble.patient');
-  
-  // For each bubble, update its control bar indicators
-  messageBubbles.forEach(bubble => {
-    // Get all annotation types in this bubble
-    const annotationStats = new Map();
-    let totalAnnotations = 0;
-    
-    // Count annotations by type
-    bubble.querySelectorAll('.highlight').forEach(highlight => {
-      const type = highlight.getAttribute('data-type');
-      if (!type) return;
-      
-      if (!annotationStats.has(type)) {
-        annotationStats.set(type, 0);
-      }
-      annotationStats.set(type, annotationStats.get(type) + 1);
-      totalAnnotations++;
-    });
-    
-    // Skip if no annotations
-    if (totalAnnotations === 0) return;
-    
-    // Get the control bar for this bubble
-    const controls = bubble.closest('.relative').querySelector('.message-controls');
-    if (!controls) return;
-    
-    // Remove any existing visibility indicators
-    controls.querySelectorAll('.annotation-visibility-indicator, .annotation-counter').forEach(indicator => {
-      indicator.remove();
-    });
-    
-    // Remove the visibility-active class
-    controls.classList.remove('visibility-active');
-    
-    // Calculate which annotation types are visible based on current filters
-    const hiddenTypes = [];
-    const visibleTypes = [];
-    
-    if (hideAll) {
-      // All types are hidden
-      hiddenTypes.push(...annotationStats.keys());
-    } else if (showAll) {
-      // All types are visible
-      visibleTypes.push(...annotationStats.keys());
-    } else {
-      // Check each type
-      for (const [type, count] of annotationStats.entries()) {
-        if (activeAnnotationFilters.includes(type)) {
-          visibleTypes.push(type);
-        } else {
-          hiddenTypes.push(type);
-        }
-      }
-    }
-    
-    // Create visualization element
-    const annotationCounter = document.createElement('div');
-    annotationCounter.className = 'annotation-counter px-2 py-1 rounded-md flex items-center gap-1';
-    
-    let tooltipText = '';
-    
-    if (totalAnnotations > 0) {
-      // Create counter with detailed breakdown
-      const hiddenCount = hiddenTypes.reduce((sum, type) => sum + (annotationStats.get(type) || 0), 0);
-      const visibleCount = totalAnnotations - hiddenCount;
-      
-      if (hideAll || hiddenCount === totalAnnotations) {
-        // All annotations are hidden
-        annotationCounter.className += ' bg-gray-100 text-gray-600';
-        annotationCounter.innerHTML = `
-          <i class="material-icons" style="font-size: 16px;">visibility_off</i>
-          <span class="text-xs">${totalAnnotations}</span>
-        `;
-        tooltipText = `All ${totalAnnotations} annotations are hidden`;
-      } else if (showAll || hiddenCount === 0) {
-        // All annotations are visible
-        annotationCounter.className += ' bg-blue-50 text-blue-600';
-        annotationCounter.innerHTML = `
-          <i class="material-icons" style="font-size: 16px;">visibility</i>
-          <span class="text-xs">${totalAnnotations}</span>
-        `;
-        tooltipText = `All ${totalAnnotations} annotations are visible`;
-      } else {
-        // Some annotations are hidden, some are visible
-        annotationCounter.className += ' bg-yellow-50 text-yellow-600';
-        annotationCounter.innerHTML = `
-          <i class="material-icons" style="font-size: 16px;">visibility</i>
-          <span class="text-xs">${visibleCount}/${totalAnnotations}</span>
-        `;
-        tooltipText = `${visibleCount} of ${totalAnnotations} annotations are visible`;
-      }
-      
-      // Add detailed tooltip
-      let tooltipDetails = '';
-      
-      // Add visible types to tooltip
-      if (visibleTypes.length > 0) {
-        tooltipDetails += 'Visible: ';
-        visibleTypes.forEach(type => {
-          tooltipDetails += `${type} (${annotationStats.get(type)}), `;
-        });
-        tooltipDetails = tooltipDetails.slice(0, -2) + '\n';
-      }
-      
-      // Add hidden types to tooltip
-      if (hiddenTypes.length > 0) {
-        tooltipDetails += 'Hidden: ';
-        hiddenTypes.forEach(type => {
-          tooltipDetails += `${type} (${annotationStats.get(type)}), `;
-        });
-        tooltipDetails = tooltipDetails.slice(0, -2);
-      }
-      
-      if (tooltipDetails) {
-        tooltipText += '\n' + tooltipDetails;
-      }
-      
-      annotationCounter.setAttribute('title', tooltipText);
-      
-      // Insert at the start of controls
-      if (controls.firstChild) {
-        controls.insertBefore(annotationCounter, controls.firstChild);
-      } else {
-        controls.appendChild(annotationCounter);
-      }
-      
-      // Add click handler to toggle visibility
-      annotationCounter.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        // If all hidden, show all
-        if (hideAll || hiddenCount === totalAnnotations) {
-          // Find and click the "Show All" button
-          const showAllBtn = document.querySelector('.annotation-filter[data-type="all"]');
-          if (showAllBtn) showAllBtn.click();
-        } 
-        // If all visible, hide all
-        else if (showAll || hiddenCount === 0) {
-          // If "all" filter is active, click it again to hide all
-          const allBtn = document.querySelector('.annotation-filter[data-type="all"]');
-          if (allBtn && activeAnnotationFilters.includes('all')) {
-            allBtn.click();
-          }
-        }
-        // If mixed, show all 
-        else {
-          // Find and click the "Show All" button
-          const showAllBtn = document.querySelector('.annotation-filter[data-type="all"]');
-          if (showAllBtn) showAllBtn.click();
-        }
-      });
-      
-      // Add class to ensure controls stay visible
-      controls.classList.add('visibility-active');
-    }
-  });
 }
 
 // Apply the current set of active filters to a specific container
@@ -551,20 +316,11 @@ function applyFilters(container) {
     return;
   }
   
-  // Check if 'all' filter is active - show all highlights
+  // Check if 'all' filter is active
   if (activeAnnotationFilters.includes('all')) {
     // Show all highlights
     highlights.forEach(highlight => {
       highlight.classList.remove('highlight-hidden');
-    });
-    return;
-  }
-  
-  // Check if 'hide_all' filter is active - hide all highlights
-  if (activeAnnotationFilters.includes('hide_all')) {
-    // Hide all highlights
-    highlights.forEach(highlight => {
-      highlight.classList.add('highlight-hidden');
     });
     return;
   }
@@ -1669,7 +1425,7 @@ function initializeFilters() {
     refreshedFilters.forEach(filter => {
       filter.classList.remove('active-filter');
       const icon = filter.querySelector('.material-icons');
-      if (icon) icon.textContent = 'visibility_off'; // Default to "eye closed" for all filters
+      if (icon) icon.textContent = 'visibility';
       
       // Add the click handler (now to the fresh element without previous handlers)
       filter.addEventListener('click', handleAnnotationFilter);
@@ -1680,25 +1436,10 @@ function initializeFilters() {
     if (allFilter) {
       allFilter.classList.add('active-filter');
       const icon = allFilter.querySelector('.material-icons');
-      if (icon) {
-        icon.textContent = 'visibility';
-        
-        // Set the correct text for the all button
-        allFilter.textContent = '';
-        allFilter.appendChild(icon);
-        allFilter.appendChild(document.createTextNode(' Show All'));
-      }
+      if (icon) icon.textContent = 'visibility_on';
       
       // Initialize the active filters array with 'all'
       activeAnnotationFilters = ['all'];
-      
-      // When "all" is active, all filter buttons should have visibility icon
-      refreshedFilters.forEach(filter => {
-        if (filter.getAttribute('data-type') !== 'all') {
-          const filterIcon = filter.querySelector('.material-icons');
-          if (filterIcon) filterIcon.textContent = 'visibility';
-        }
-      });
       
       // Make sure all highlights are visible by default
       document.querySelectorAll('.message-bubble.patient .highlight').forEach(highlight => {
@@ -1711,9 +1452,6 @@ function initializeFilters() {
     
     // Apply initial filter state to all highlights
     applyFiltersToDocument();
-    
-    // Ensure visibility indicators are initialized
-    updateAnnotationVisibilityIndicators();
   } else {
     console.warn('No annotation filters found in the document');
   }
@@ -1993,8 +1731,6 @@ function highlightCurrentTranscriptSection() {
       
       if (currentTime >= start && currentTime <= end) {
         element.classList.add('currently-playing');
-        // Temporarily make visible even if filter is hiding it
-        element.classList.remove('highlight-hidden');
         foundActiveElement = true;
         
         // Also add a class to the parent bubble for visibility
@@ -2006,8 +1742,6 @@ function highlightCurrentTranscriptSection() {
           const parentHighlight = element.closest('.highlight:not(.word-timestamp)');
           if (parentHighlight) {
             parentHighlight.classList.add('highlight-active');
-            // Temporarily make visible even if filter is hiding it
-            parentHighlight.classList.remove('highlight-hidden');
           }
         }
       }
@@ -2023,8 +1757,6 @@ function highlightCurrentTranscriptSection() {
         
         if (currentTime >= start && currentTime <= end) {
           element.classList.add('currently-playing');
-          // Temporarily make visible even if filter is hiding it
-          element.classList.remove('highlight-hidden');
           foundActiveElement = true;
           
           // Also highlight the message bubble containing this annotation
@@ -2071,56 +1803,38 @@ function clearActiveHighlights() {
 
 // Add event listeners to all word timestamps
 function attachWordTimestampClickHandlers() {
-  console.log("Attaching word timestamp click handlers");
   const wordTimestamps = document.querySelectorAll('.word-timestamp');
-  console.log(`Found ${wordTimestamps.length} word timestamps to attach handlers to`);
   
-  // First remove any existing handlers to prevent duplicates
   wordTimestamps.forEach(word => {
-    word.removeEventListener('click', handleWordTimestampClick);
-    // Now add the event listener
     word.addEventListener('click', handleWordTimestampClick);
   });
-  
-  console.log("Word timestamp handlers attached successfully");
 }
 
 // Handle word timestamp click
 function handleWordTimestampClick(e) {
-  e.preventDefault();
-  e.stopPropagation();
-  // Use e.currentTarget to ensure we get the element with the event listener
   const timestamp = e.currentTarget.getAttribute('data-timestamp');
   
   if (timestamp) {
     // Extract the start time (format: "start:end")
-    const [startTime, endTime] = timestamp.split(':').map(Number);
+    const startTime = parseFloat(timestamp.split(':')[0]);
     
-    // Use the global audioPlayer variable instead of getElementById
-    if (audioPlayer) {
+    // Get the audio element
+    const audio = document.getElementById('audioPlayer');
+    
+    if (audio) {
       // Set the current time to the start time of the word
-      audioPlayer.currentTime = startTime;
-      currentAudioTime = startTime;
-      
-      // Update the progress indicator
-      if (audioPlayer.duration) {
-        updateProgressBar((startTime / audioPlayer.duration) * 100);
-      }
-      
-      // Update the time display
-      updateTimeDisplay();
+      audio.currentTime = startTime;
       
       // Check if audio is not already playing, and play it
-      if (audioPlayer.paused) {
+      if (audio.paused) {
         startPlayback();
       }
       
+      // Update the progress indicator
+      updateProgressBar((startTime / audio.duration) * 100);
+      
       // Highlight the current section of the transcript
       highlightCurrentTranscriptSection();
-      
-      console.log(`Jumped to timestamp: ${startTime}s for word: "${e.currentTarget.textContent}"`);
-    } else {
-      console.error('Audio player not found');
     }
   }
 }
@@ -2425,808 +2139,139 @@ function showTranscriptEditPopup(messageBubble) {
     
     // Function to update preview
     function updatePreview() {
-        // Get the transcript content
+        // Get the edited text
         const content = editableArea.innerHTML;
+        
+        // Detect if new words have been added and add timestamps automatically
+        detectNewWordsAndAddTimestamps();
         
         // Update the preview area
         previewArea.innerHTML = content;
     }
     
-    // Function to add a new timestamp
-    function addNewTimestamp() {
-        const timestampsList = document.getElementById('timestampsList');
+    // Function to detect new words and add timestamps automatically
+    function detectNewWordsAndAddTimestamps() {
+        // Get the edited content and compare with original
+        const content = editableArea.innerHTML;
+        const plainText = editableArea.textContent.trim();
         
-        // Remove empty state if present
-        const emptyState = timestampsList.querySelector('div[style*="text-align: center"]');
-        if (emptyState) {
-            emptyState.remove();
+        // Get existing timestamps
+        let timestamps = collectTimestamps();
+        
+        // Split into words for analysis
+        const words = plainText.split(/\s+/);
+        
+        // Skip if no words or if all words already have timestamps
+        if (words.length === 0 || words.length <= timestamps.length) return;
+        
+        // Get last used timestamp from existing timestamps
+        let lastTimestampEnd = 0;
+        if (timestamps.length > 0) {
+            // Sort by end time
+            timestamps.sort((a, b) => {
+                const aEnd = parseFloat(a.timestamp.split(':')[1]);
+                const bEnd = parseFloat(b.timestamp.split(':')[1]);
+                return aEnd - bEnd;
+            });
+            
+            // Get the end time of the last timestamp
+            const lastTimestamp = timestamps[timestamps.length - 1];
+            lastTimestampEnd = parseFloat(lastTimestamp.timestamp.split(':')[1]);
         }
         
-        // Create a timestamp item
-        const timestampItem = document.createElement('div');
-        timestampItem.className = 'timestamp-item';
-        timestampItem.style.backgroundColor = '#f9fafb';
-        timestampItem.style.border = '1px solid #e5e7eb';
-        timestampItem.style.borderRadius = '6px';
-        timestampItem.style.padding = '12px';
-        timestampItem.style.display = 'grid';
-        timestampItem.style.gridTemplateColumns = '1fr auto auto auto';
-        timestampItem.style.gap = '12px';
-        timestampItem.style.alignItems = 'center';
+        // Create new timestamp items for new words
+        const newWordsCount = words.length - timestamps.length;
+        console.log(`Detected ${newWordsCount} new words to timestamp`);
         
-        timestampItem.innerHTML = `
-            <div>
-                <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px;">Text</label>
-                <input type="text" class="timestamp-text" placeholder="Word or phrase" style="width: 100%; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
-            </div>
+        // Get current audio duration to calculate appropriate intervals
+        const audioPlayer = document.getElementById('audioPlayer') || { duration: 120 };
+        const audioDuration = audioPlayer.duration || 120; // fallback to 2 minutes
+        
+        // Calculate time increment for each new word
+        // Use a small increment (0.3s) that still provides reasonable spacing
+        const timeIncrement = 0.3;
+        
+        // For each new word, create a timestamp starting after the last timestamp
+        for (let i = 0; i < newWordsCount; i++) {
+            // Get the word from the end of the array (newest words)
+            const wordIndex = timestamps.length + i;
+            if (wordIndex >= words.length) break;
             
-            <div>
-                <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px;">Start</label>
-                <input type="text" class="timestamp-start" placeholder="0.00" style="width: 70px; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
-            </div>
+            const word = words[wordIndex];
+            if (!word || word.length < 2) continue; // Skip very short words
             
-            <div>
-                <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px;">End</label>
-                <input type="text" class="timestamp-end" placeholder="0.00" style="width: 70px; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
-            </div>
+            // Calculate start and end times for this word
+            const startTime = lastTimestampEnd + (i * timeIncrement);
+            const endTime = startTime + timeIncrement;
             
-            <div>
-                <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px;">Type</label>
-                <select class="timestamp-type" style="padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; background-color: white;">
-                    <option value="word">Word</option>
-                    <option value="filler">Filler</option>
-                    <option value="repetition">Repetition</option>
-                    <option value="pause">Pause</option>
-                    <option value="mispronunciation">Mispronunciation</option>
-                    <option value="grammar">Grammar</option>
-                </select>
-            </div>
+            // Make sure we don't exceed audio duration
+            if (startTime >= audioDuration) break;
             
-            <button class="remove-timestamp" style="background: none; border: none; color: #ef4444; cursor: pointer; align-self: end; padding: 6px;">
-                <i class="material-icons">delete</i>
-            </button>
-        `;
-        
-        // Add to list
-        timestampsList.prepend(timestampItem);
-        
-        // Add event listener to remove button
-        const removeBtn = timestampItem.querySelector('.remove-timestamp');
-        removeBtn.addEventListener('click', function() {
-            timestampItem.remove();
+            // Create timestamp element
+            const timestampsList = document.getElementById('timestampsList');
+            if (!timestampsList) break;
             
-            // If no timestamps left, add empty state
-            if (timestampsList.children.length === 0) {
-                timestampsList.innerHTML = `
-                    <div style="text-align: center; padding: 24px; color: #6b7280;">
-                        <i class="material-icons" style="font-size: 32px; margin-bottom: 8px;">timer_off</i>
-                        <p style="margin: 0; font-size: 14px;">No timestamps found</p>
-                        <p style="margin: 4px 0 0; font-size: 12px;">Click "Add Timestamp" to create one</p>
-                    </div>
-                `;
-            }
-        });
-    }
-    
-    // Function to collect timestamps from the UI
-    function collectTimestamps() {
-        const timestamps = [];
-        const timestampItems = document.querySelectorAll('.timestamp-item');
-        
-        timestampItems.forEach(item => {
-            const text = item.querySelector('.timestamp-text').value;
-            const start = item.querySelector('.timestamp-start').value;
-            const end = item.querySelector('.timestamp-end').value;
-            const type = item.querySelector('.timestamp-type').value;
+            // Create a new timestamp item
+            const newItem = document.createElement('div');
+            newItem.className = 'timestamp-item';
+            newItem.style.backgroundColor = '#f9fafb';
+            newItem.style.border = '1px solid #e5e7eb';
+            newItem.style.borderRadius = '6px';
+            newItem.style.padding = '12px';
+            newItem.style.display = 'grid';
+            newItem.style.gridTemplateColumns = '1fr auto auto auto';
+            newItem.style.gap = '12px';
+            newItem.style.alignItems = 'center';
+            newItem.style.animation = 'fadeIn 0.5s';
             
-            if (text && start && end) {
-                timestamps.push({
-                    text,
-                    timestamp: `${start}:${end}`,
-                    type
-                });
-            }
-        });
-        
-        return timestamps;
-    }
-    
-    // Function to save the edited content
-    function saveEdit() {
-        // Get the edited text
-        const editedText = editableArea.innerHTML;
-        
-        // Get the timestamps
-        const timestamps = collectTimestamps();
-        
-        console.log('Saving edited text and timestamps:', timestamps.length);
-        
-        // Apply timestamps to the message bubble using the new function
-        // This will clear old annotations and only apply the new ones
-        applyTimestampsToContent(messageBubble, editedText, timestamps);
-        
-        // Explicitly reattach all timestamp handlers to ensure proper functionality
-        reattachAllTimestampHandlers();
-        
-        // Update the audio highlighting based on current playback time
-        highlightCurrentTranscriptSection();
-        
-        // Update annotation visibility indicators if any annotations were hidden
-        updateAnnotationVisibilityIndicators();
-        
-        // Show success message
-        showToast('Changes saved successfully', 'success');
-        
-        // Save edit history if that function exists
-        if (typeof saveEditHistory === 'function') {
-            saveEditHistory(messageBubble.innerHTML);
-        }
-        
-        // Close popup
-        closePopup();
-    }
-    
-    // Apply timestamps to content
-    function applyTimestampsToContent(bubble, content, timestamps) {
-        // Extract plain text from content, removing all HTML
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = content;
-        const plainText = tempDiv.textContent;
-        
-        // Create a new HTML string with timestamps applied
-        let html = '';
-        let lastIndex = 0;
-        
-        // Sort timestamps by position in text
-        const sortedTimestamps = [...timestamps].sort((a, b) => {
-            const aIndex = plainText.toLowerCase().indexOf(a.text.toLowerCase());
-            const bIndex = plainText.toLowerCase().indexOf(b.text.toLowerCase());
-            return aIndex - bIndex;
-        });
-        
-        // Apply each timestamp
-        for (const ts of sortedTimestamps) {
-            if (!ts.text.trim()) continue;
-            
-            // Find position of this text in plain content
-            const index = plainText.toLowerCase().indexOf(ts.text.toLowerCase(), lastIndex);
-            if (index === -1) continue;
-            
-            // Add text before this timestamp
-            html += plainText.substring(lastIndex, index);
-            
-            // Get exact text with original casing
-            const originalText = plainText.substring(index, index + ts.text.length);
-            
-            // Create span for this timestamp
-            const [start, end] = ts.timestamp.split(':');
-            
-            if (ts.type && ts.type !== 'word') {
-                // Create highlight span
-                const uniqueId = Math.floor(Math.random() * 10000);
-                let extraAttrs = '';
+            newItem.innerHTML = `
+                <div>
+                    <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px;">Text</label>
+                    <input type="text" class="timestamp-text" value="${word}" placeholder="Word or phrase" style="width: 100%; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+                </div>
                 
-                // Add duration attribute for pauses
-                if (ts.type === 'pause') {
-                    const duration = (parseFloat(end) - parseFloat(start)).toFixed(3);
-                    extraAttrs = ` data-duration="${duration}"`;
-                }
+                <div>
+                    <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px;">Start</label>
+                    <input type="text" class="timestamp-start" placeholder="0.00" value="${startTime.toFixed(2)}" style="width: 70px; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+                </div>
                 
-                html += `<span class="highlight highlight-${ts.type} ${ts.type}${uniqueId}" data-timestamp="${ts.timestamp}" data-type="${ts.type}"${extraAttrs}>${originalText}</span>`;
-            } else {
-                // Create regular word-timestamp span
-                html += `<span class="word-timestamp" data-timestamp="${ts.timestamp}">${originalText}</span>`;
-            }
-            
-            // Update last index to continue after this match
-            lastIndex = index + originalText.length;
-        }
-        
-        // Add any remaining text
-        html += plainText.substring(lastIndex);
-        
-        // Update bubble content
-        bubble.innerHTML = html;
-        
-        // After updating the content, attach click handlers to timestamp elements
-        const wordTimestamps = bubble.querySelectorAll('.word-timestamp');
-        const annotations = bubble.querySelectorAll('.highlight:not(.word-timestamp)');
-        
-        console.log(`Found ${wordTimestamps.length} word timestamps and ${annotations.length} annotations to attach handlers to`);
-        
-        // Apply highlighting handlers
-        wordTimestamps.forEach(span => {
-            span.removeEventListener('click', handleWordTimestampClick);
-            span.addEventListener('click', handleWordTimestampClick);
-        });
-        
-        annotations.forEach(span => {
-            span.removeEventListener('click', handleHighlightClick);
-            span.addEventListener('click', handleHighlightClick);
-        });
-        
-        console.log(`Applied ${timestamps.length} timestamps to edited content`);
-    }
+                <div>
+                    <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px;">End</label>
+                    <input type="text" class="timestamp-end" placeholder="0.00" value="${endTime.toFixed(2)}" style="width: 70px; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+                </div>
+                
+                <div>
+                    <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px;">Type</label>
+                    <select class="timestamp-type" style="padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; background-color: white;">
+                        <option value="word" selected>Word</option>
+                        <option value="filler">Filler</option>
+                        <option value="repetition">Repetition</option>
+                        <option value="pause">Pause</option>
+                        <option value="mispronunciation">Mispronunciation</option>
+                        <option value="grammar">Grammar</option>
+                    </select>
+                </div>
+                
+                <button class="remove-timestamp" style="background: none; border: none; color: #ef4444; cursor: pointer; align-self: end; padding: 6px;">
+                    <i class="material-icons">delete</i>
+                </button>
+            `;
     
-    // Add event listeners
-    closeBtn.addEventListener('click', closePopup);
-    cancelBtn.addEventListener('click', closePopup);
-    saveBtn.addEventListener('click', saveEdit);
-    refreshBtn.addEventListener('click', updatePreview);
-    
-    // Add event listener for add timestamp button
-    if (addTimestampBtn) {
-        addTimestampBtn.addEventListener('click', addNewTimestamp);
-    }
-    
-    // Add event listeners to remove timestamp buttons
-    document.querySelectorAll('.remove-timestamp').forEach(button => {
-        button.addEventListener('click', function() {
-            const item = this.closest('.timestamp-item');
-            if (item) {
-                item.remove();
-            }
-        });
-    });
-    
-    // Update preview when content changes
-    editableArea.addEventListener('input', updatePreview);
-    
-    // Setup keyboard shortcuts
-    document.addEventListener('keydown', function escHandler(e) {
-        if (e.key === 'Escape') {
-            closePopup();
-            document.removeEventListener('keydown', escHandler);
-        } else if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-            e.preventDefault();
-            saveEdit();
-        }
-    });
-    
-    // Focus editable area
-    setTimeout(() => {
-        editableArea.focus();
-    }, 100);
-}
-
-// Add custom styles for the transcript edit popup
-function addEditPopupStyles() {
-    // Check if styles already exist
-    if (document.getElementById('editPopupStyles')) return;
-    
-    // Create style element
-    const styleEl = document.createElement('style');
-    styleEl.id = 'editPopupStyles';
-    
-    // Define styles
-    styleEl.textContent = `
-        /* Animation keyframes */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-        
-        @keyframes scaleIn {
-            from { transform: scale(0.95); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-        
-        @keyframes savePulse {
-            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5); }
-            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
-        }
-        
-        /* Animation classes */
-        .animate-fade-in {
-            animation: fadeIn 0.3s ease-out;
-        }
-        
-        .animate-fade-out {
-            animation: fadeOut 0.2s ease-out;
-        }
-        
-        .animate-scale-in {
-            animation: scaleIn 0.3s ease-out;
-        }
-        
-        /* Highlight visibility transitions */
-        .highlight {
-            transition: opacity 0.3s ease-out, background-color 0.2s ease-out;
-        }
-        
-        .highlight-hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-        
-        /* Annotation filter button transitions */
-        .annotation-filter {
-            transition: all 0.2s ease-out;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        /* Inactive filter (visibility_off) styling */
-        .annotation-filter:not(.active-filter) {
-            opacity: 0.75;
-            background-color: #f3f4f6 !important;
-            color: #6b7280 !important;
-            border-color: #e5e7eb !important;
-        }
-        
-        .annotation-filter:not(.active-filter):hover {
-            opacity: 0.9;
-            background-color: #e5e7eb !important;
-        }
-        
-        .annotation-filter:not(.active-filter)::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: repeating-linear-gradient(
-                -45deg,
-                rgba(0, 0, 0, 0.03),
-                rgba(0, 0, 0, 0.03) 5px,
-                rgba(0, 0, 0, 0) 5px,
-                rgba(0, 0, 0, 0) 10px
-            );
-            pointer-events: none;
-        }
-        
-        /* Active filter styling */
-        .annotation-filter.active-filter {
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            transform: translateY(-1px);
-        }
-        
-        /* Message controls styling */
-        .message-controls {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            transition: opacity 0.2s ease-out;
-            background-color: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(4px);
-            padding: 2px 4px;
-            border-radius: 6px;
-        }
-        
-        .message-controls.visibility-active {
-            opacity: 1 !important;
-        }
-        
-        .message-controls button {
-            transition: transform 0.15s ease-out, background-color 0.15s ease-out;
-        }
-        
-        .message-controls button:hover {
-            transform: translateY(-1px);
-        }
-        
-        .message-controls button:active {
-            transform: translateY(0);
-        }
-        
-        /* Visibility indicator styling */
-        .annotation-visibility-indicator {
-            opacity: 0.8;
-            transition: opacity 0.2s ease-out, background-color 0.2s ease-out;
-        }
-        
-        .annotation-visibility-indicator:hover {
-            opacity: 1;
-        }
-        
-        /* Annotation counter styling */
-        .annotation-counter {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            cursor: pointer;
-            font-size: 13px;
-            transition: all 0.2s ease-out;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            opacity: 0.9;
-            margin-right: 4px;
-            white-space: nowrap;
-        }
-        
-        .annotation-counter:hover {
-            opacity: 1;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        
-        .annotation-counter:active {
-            transform: translateY(0);
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-        }
-        
-        /* Badge color styling */
-        .annotation-counter.bg-blue-50 {
-            background-color: #eff6ff;
-            border-color: #dbeafe;
-        }
-        
-        .annotation-counter.bg-blue-50:hover {
-            background-color: #dbeafe;
-        }
-        
-        .annotation-counter.bg-yellow-50 {
-            background-color: #fefce8;
-            border-color: #fef08a;
-        }
-        
-        .annotation-counter.bg-yellow-50:hover {
-            background-color: #fef9c3;
-        }
-        
-        .annotation-counter.bg-gray-100 {
-            background-color: #f3f4f6;
-            border-color: #e5e7eb;
-        }
-        
-        .annotation-counter.bg-gray-100:hover {
-            background-color: #e5e7eb;
-        }
-        
-        /* Tooltip enhancement */
-        [title] {
-            position: relative;
-        }
-        
-        [title]:hover::after {
-            content: attr(title);
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            white-space: pre-wrap;
-            background: #333;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: normal;
-            max-width: 300px;
-            text-align: left;
-            line-height: 1.4;
-            z-index: 10;
-            opacity: 0;
-            pointer-events: none;
-            animation: fadeIn 0.3s ease forwards;
-        }
-        
-        [title]:hover::before {
-            content: "";
-            position: absolute;
-            bottom: 98%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 5px solid transparent;
-            border-top-color: #333;
-            z-index: 10;
-            animation: fadeIn 0.3s ease forwards;
-        }
-        
-        /* Utility classes for the popup */
-        .fixed {
-            position: fixed;
-        }
-        
-        .inset-0 {
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0;
-        }
-        
-        .bg-black\\/40 {
-            background-color: rgba(0, 0, 0, 0.4);
-        }
-        
-        .backdrop-blur-sm {
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-        }
-        
-        .z-50 {
-            z-index: 50;
-        }
-        
-        .flex {
-            display: flex;
-        }
-        
-        .items-center {
-            align-items: center;
-        }
-        
-        .justify-center {
-            justify-content: center;
-        }
-        
-        .overflow-hidden {
-            overflow: hidden;
-        }
-        
-        .bg-white {
-            background-color: white;
-        }
-        
-        .rounded-lg {
-            border-radius: 0.5rem;
-        }
-        
-        .shadow-lg {
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        
-        .w-full {
-            width: 100%;
-        }
-        
-        .max-w-3xl {
-            max-width: 48rem;
-        }
-        
-        .max-h-\\[90vh\\] {
-            max-height: 90vh;
-        }
-        
-        .transform {
-            transform: translateX(0) translateY(0) rotate(0) skewX(0) skewY(0) scaleX(1) scaleY(1);
-        }
-        
-        .transition-all {
-            transition-property: all;
-            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-            transition-duration: 150ms;
-        }
-        
-        .flex-col {
-            flex-direction: column;
-        }
-        
-        /* Custom scrollbar */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 10px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #a1a1a1;
-        }
-        
-        /* Button animation */
-        .save-button-pulse {
-            animation: savePulse 2s infinite;
-        }
-        
-        /* Highlight styles */
-        .highlight {
-            display: inline;
-            padding: 0 2px;
-            border-radius: 3px;
-            font-weight: 500;
-        }
-        
-        .highlight-pause {
-            background-color: rgba(59, 130, 246, 0.1);
-            color: rgb(37, 99, 235);
-            border-bottom: 1px dashed rgb(37, 99, 235);
-        }
-        
-        .highlight-filler {
-            background-color: rgba(251, 191, 36, 0.1);
-            color: rgb(217, 119, 6);
-            border-bottom: 1px dashed rgb(217, 119, 6);
-        }
-        
-        .highlight-repetition {
-            background-color: rgba(250, 204, 21, 0.1);
-            color: rgb(202, 138, 4);
-            border-bottom: 1px dashed rgb(202, 138, 4);
-        }
-        
-        .highlight-mispronunciation {
-            background-color: rgba(168, 85, 247, 0.1);
-            color: rgb(147, 51, 234);
-            border-bottom: 1px dashed rgb(147, 51, 234);
-        }
-        
-        .highlight-grammar {
-            background-color: rgba(34, 197, 94, 0.1);
-            color: rgb(22, 163, 74);
-            border-bottom: 1px dashed rgb(22, 163, 74);
-        }
-        
-        /* Style for editable transcript */
-        #editableTranscript:focus {
-            outline: none;
-        }
-        
-        /* Timestamp item transitions */
-        .timestamp-item {
-            transition: all 0.2s ease-out;
-        }
-        
-        /* Additional styles for the edit popup */
-        #transcriptEditPopup {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-        
-        #transcriptEditPopup .bg-blue-50 {
-            background-color: #eff6ff;
-        }
-        
-        #transcriptEditPopup .text-blue-800 {
-            color: #1e40af;
-        }
-        
-        #transcriptEditPopup .border-blue-100 {
-            border-color: #dbeafe;
-        }
-        
-        #transcriptEditPopup .text-blue-600 {
-            color: #2563eb;
-        }
-        
-        #transcriptEditPopup .hover\\:bg-blue-100:hover {
-            background-color: #dbeafe;
-        }
-        
-        #transcriptEditPopup .border-gray-200 {
-            border-color: #e5e7eb;
-        }
-        
-        #transcriptEditPopup .border-blue-600 {
-            border-color: #2563eb;
-        }
-        
-        #transcriptEditPopup .text-gray-500 {
-            color: #6b7280;
-        }
-        
-        #transcriptEditPopup .hover\\:text-gray-700:hover {
-            color: #374151;
-        }
-        
-        #transcriptEditPopup .hover\\:border-gray-300:hover {
-            border-color: #d1d5db;
-        }
-        
-        #transcriptEditPopup .text-gray-700 {
-            color: #374151;
-        }
-        
-        #transcriptEditPopup .bg-gray-50 {
-            background-color: #f9fafb;
-        }
-        
-        #transcriptEditPopup .text-red-500 {
-            color: #ef4444;
-        }
-        
-        #transcriptEditPopup .hover\\:bg-red-50:hover {
-            background-color: #fef2f2;
-        }
-        
-        #transcriptEditPopup .border-red-100 {
-            border-color: #fee2e2;
-        }
-        
-        /* For the buttons */
-        #transcriptEditPopup .bg-blue-600 {
-            background-color: #2563eb;
-        }
-        
-        #transcriptEditPopup .text-white {
-            color: white;
-        }
-        
-        #transcriptEditPopup .hover\\:bg-blue-700:hover {
-            background-color: #1d4ed8;
-        }
-    `;
-    
-    // Append to document head
-    document.head.appendChild(styleEl);
-} 
-
-// ... rest of the existing code ...
-
-// Function to add a new timestamp entry
-function addNewTimestamp() {
-    const timestampsList = document.getElementById('timestampsList');
-    if (!timestampsList) return;
-    
-    // Remove empty state if present
-    const emptyState = timestampsList.querySelector('.text-center');
-    if (emptyState) {
-        emptyState.remove();
-    }
-    
-    const newTimestamp = document.createElement('div');
-    newTimestamp.className = 'timestamp-item flex flex-col sm:flex-row gap-2 p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow animate-slide-in';
-    
-    newTimestamp.innerHTML = `
-        <!-- Text input -->
-        <div class="flex-1">
-            <label class="block text-xs text-gray-500 mb-1">Word/Phrase</label>
-            <input type="text" class="timestamp-text w-full text-sm p-2 border border-gray-300 rounded-md" 
-                placeholder="Enter word or phrase">
-        </div>
-        
-        <!-- Timestamps -->
-        <div class="flex gap-2 items-end">
-            <div>
-                <label class="block text-xs text-gray-500 mb-1">Start</label>
-                <input type="text" class="timestamp-start w-20 text-sm p-2 border border-gray-300 rounded-md" 
-                    placeholder="00:00.0">
-            </div>
-            <div class="pb-2">
-                <span class="text-gray-400">to</span>
-            </div>
-            <div>
-                <label class="block text-xs text-gray-500 mb-1">End</label>
-                <input type="text" class="timestamp-end w-20 text-sm p-2 border border-gray-300 rounded-md" 
-                    placeholder="00:00.0">
-            </div>
-        </div>
-        
-        <!-- Type and delete -->
-        <div class="flex gap-2 items-end">
-            <div>
-                <label class="block text-xs text-gray-500 mb-1">Type</label>
-                <select class="timestamp-type text-sm p-2 border border-gray-300 rounded-md bg-gray-50">
-                    <option value="word">Word</option>
-                    <option value="filler">Filler</option>
-                    <option value="repetition">Repetition</option>
-                    <option value="pause">Pause</option>
-                    <option value="mispronunciation">Mispronunciation</option>
-                    <option value="grammar">Grammar</option>
-                </select>
-            </div>
-            <button class="remove-timestamp h-10 p-2 text-gray-400 hover:text-red-500 rounded-md hover:bg-red-50 transition-colors border border-transparent hover:border-red-100">
-                <i class="material-icons">delete_outline</i>
-            </button>
-        </div>
-    `;
-    
-    timestampsList.insertBefore(newTimestamp, timestampsList.firstChild);
+    timestampsList.insertBefore(newItem, timestampsList.firstChild);
     
     // Add remove button handler
-    newTimestamp.querySelector('.remove-timestamp').addEventListener('click', () => {
-        newTimestamp.style.opacity = '0';
-        newTimestamp.style.transform = 'translateX(10px)';
+    newItem.querySelector('.remove-timestamp').addEventListener('click', () => {
+        newItem.style.opacity = '0';
+        newItem.style.transform = 'translateX(10px)';
         setTimeout(() => {
-            newTimestamp.remove();
+            newItem.remove();
             updateTranscriptPreview();
             checkEmptyState();
         }, 200);
     });
     
     // Focus the text input
-    newTimestamp.querySelector('.timestamp-text').focus();
+    newItem.querySelector('.timestamp-text').focus();
     
     // Scroll to the new timestamp
     timestampsList.scrollTop = 0;
@@ -3254,19 +2299,14 @@ function saveTranscriptEdit(messageBubble) {
             };
         }).filter(ts => ts.text && ts.timestamp.includes(':'));
         
-        console.log(`Collected ${timestamps.length} timestamps from the editor`);
-        
         // Apply timestamps to the message bubble - this will clear old annotations
         applyTimestampsToContent(messageBubble, editedContent, timestamps);
         
-        // Explicitly reattach all timestamp handlers
+        // Reattach all timestamp handlers
         reattachAllTimestampHandlers();
         
         // Update highlighting if audio is playing
         highlightCurrentTranscriptSection();
-        
-        // Update annotation visibility indicators if any annotations were hidden
-        updateAnnotationVisibilityIndicators();
         
         // Remove message edit mode styling
         messageBubble.classList.remove('message-edit-mode');
@@ -3314,8 +2354,6 @@ function saveTranscriptEdit(messageBubble) {
             });
         });
         
-        console.log(`Extracted ${timestamps.length} timestamps from edited content`);
-        
         // Re-apply timestamps to ensure consistent formatting
         if (timestamps.length > 0) {
             // Get the plain text content
@@ -3324,14 +2362,11 @@ function saveTranscriptEdit(messageBubble) {
             // Apply timestamps - this will clear old annotations and apply new ones
             applyTimestampsToContent(messageBubble, plainContent, timestamps);
             
-            // Explicitly reattach handlers after editing
+            // Reattach handlers after editing
             reattachAllTimestampHandlers();
             
             // Update highlighting if audio is playing
             highlightCurrentTranscriptSection();
-            
-            // Update annotation visibility indicators if any annotations were hidden
-            updateAnnotationVisibilityIndicators();
         }
         
         // Update the original content
@@ -4378,27 +3413,225 @@ function addEditPopupStyles() {
 
 // Helper function to reattach all timestamp handlers
 function reattachAllTimestampHandlers() {
-    console.log("Reattaching all timestamp handlers");
+    // Reattach handlers for word timestamps
+    attachWordTimestampClickHandlers();
     
-    // Find all word timestamps in the document
-    const wordTimestamps = document.querySelectorAll('.word-timestamp');
-    console.log(`Found ${wordTimestamps.length} word timestamps`);
+    // Reattach handlers for annotations
+    attachAnnotationClickHandlers();
     
-    // Remove existing handlers and attach new ones
-    wordTimestamps.forEach(span => {
-        span.removeEventListener('click', handleWordTimestampClick);
-        span.addEventListener('click', handleWordTimestampClick);
+    // Any other handlers that need to be attached
+    // can be added here
+}
+
+// Function to sort all timestamps by time
+function sortTimestampsByTime() {
+    const timestampsList = document.getElementById('timestampsList');
+    if (!timestampsList) return;
+    
+    const items = Array.from(timestampsList.querySelectorAll('.timestamp-item'));
+    if (items.length <= 1) return;
+    
+    // Sort items by start time
+    items.sort((a, b) => {
+        const aStart = parseFloat(a.querySelector('.timestamp-start').value);
+        const bStart = parseFloat(b.querySelector('.timestamp-start').value);
+        return aStart - bStart;
     });
     
-    // Find all highlight annotations
-    const highlightElements = document.querySelectorAll('.message-bubble.patient .highlight:not(.word-timestamp)');
-    console.log(`Found ${highlightElements.length} highlight elements`);
+    // Clear current list
+    timestampsList.innerHTML = '';
     
-    // Remove existing handlers and attach new ones
-    highlightElements.forEach(highlight => {
-        highlight.removeEventListener('click', handleHighlightClick);
-        highlight.addEventListener('click', handleHighlightClick);
+    // Add items back in sorted order
+    items.forEach(item => {
+        timestampsList.appendChild(item);
     });
     
-    console.log("All timestamp handlers reattached successfully");
+    console.log('Timestamps sorted by time');
+}
+
+// Function to add a new timestamp entry with time order
+function addNewTimestamp() {
+    const timestampsList = document.getElementById('timestampsList');
+    if (!timestampsList) return;
+    
+    // Remove empty state if present
+    const emptyState = timestampsList.querySelector('div[style*="text-align: center"]');
+    if (emptyState) {
+        emptyState.remove();
+    }
+    
+    // Get existing timestamps and find the last end time
+    let lastEndTime = 0;
+    const timestamps = collectTimestamps();
+    if (timestamps.length > 0) {
+        // Sort by end time
+        timestamps.sort((a, b) => {
+            const aEnd = parseFloat(a.timestamp.split(':')[1]);
+            const bEnd = parseFloat(b.timestamp.split(':')[1]);
+            return aEnd - bEnd;
+        });
+        
+        // Get the end time of the last timestamp
+        const lastTimestamp = timestamps[timestamps.length - 1];
+        lastEndTime = parseFloat(lastTimestamp.timestamp.split(':')[1]);
+    }
+    
+    // Set new timestamp time after the last one
+    const startTime = lastEndTime + 0.1;
+    const endTime = startTime + 0.3;
+    
+    // Create a timestamp item
+    const timestampItem = document.createElement('div');
+    timestampItem.className = 'timestamp-item';
+    timestampItem.style.backgroundColor = '#f9fafb';
+    timestampItem.style.border = '1px solid #e5e7eb';
+    timestampItem.style.borderRadius = '6px';
+    timestampItem.style.padding = '12px';
+    timestampItem.style.display = 'grid';
+    timestampItem.style.gridTemplateColumns = '1fr auto auto auto';
+    timestampItem.style.gap = '12px';
+    timestampItem.style.alignItems = 'center';
+    
+    timestampItem.innerHTML = `
+        <div>
+            <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px;">Text</label>
+            <input type="text" class="timestamp-text" placeholder="Word or phrase" style="width: 100%; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+        </div>
+        
+        <div>
+            <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px;">Start</label>
+            <input type="text" class="timestamp-start" placeholder="0.00" value="${startTime.toFixed(2)}" style="width: 70px; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+        </div>
+        
+        <div>
+            <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px;">End</label>
+            <input type="text" class="timestamp-end" placeholder="0.00" value="${endTime.toFixed(2)}" style="width: 70px; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+        </div>
+        
+        <div>
+            <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px;">Type</label>
+            <select class="timestamp-type" style="padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; background-color: white;">
+                <option value="word">Word</option>
+                <option value="filler">Filler</option>
+                <option value="repetition">Repetition</option>
+                <option value="pause">Pause</option>
+                <option value="mispronunciation">Mispronunciation</option>
+                <option value="grammar">Grammar</option>
+            </select>
+        </div>
+        
+        <button class="remove-timestamp" style="background: none; border: none; color: #ef4444; cursor: pointer; align-self: end; padding: 6px;">
+            <i class="material-icons">delete</i>
+        </button>
+    `;
+    
+    // Add to list in time order
+    const timestampItems = timestampsList.querySelectorAll('.timestamp-item');
+    let inserted = false;
+    
+    // Try to insert in time order
+    if (timestampItems.length > 0) {
+        for (let j = 0; j < timestampItems.length; j++) {
+            const item = timestampItems[j];
+            const itemStartTime = parseFloat(item.querySelector('.timestamp-start').value);
+            
+            if (startTime < itemStartTime) {
+                timestampsList.insertBefore(timestampItem, item);
+                inserted = true;
+                break;
+            }
+        }
+    }
+    
+    // If not inserted, append to the end
+    if (!inserted) {
+        timestampsList.appendChild(timestampItem);
+    }
+    
+    // Add event listener to remove button
+    const removeBtn = timestampItem.querySelector('.remove-timestamp');
+    removeBtn.addEventListener('click', function() {
+        timestampItem.style.opacity = '0';
+        timestampItem.style.transform = 'translateX(10px)';
+        setTimeout(() => {
+            timestampItem.remove();
+            
+            // If no timestamps left, add empty state
+            if (timestampsList.children.length === 0) {
+                timestampsList.innerHTML = `
+                    <div style="text-align: center; padding: 24px; color: #6b7280;">
+                        <i class="material-icons" style="font-size: 32px; margin-bottom: 8px;">timer_off</i>
+                        <p style="margin: 0; font-size: 14px;">No timestamps found</p>
+                        <p style="margin: 4px 0 0; font-size: 12px;">Click "Add Timestamp" to create one</p>
+                    </div>
+                `;
+            }
+        }, 200);
+    });
+    
+    // Focus the new text input
+    timestampItem.querySelector('.timestamp-text').focus();
+}
+
+// Enhance timestamp collection to sort by time
+function collectTimestamps() {
+    const timestamps = [];
+    const timestampItems = document.querySelectorAll('.timestamp-item');
+    
+    timestampItems.forEach(item => {
+        const text = item.querySelector('.timestamp-text').value.trim();
+        const start = item.querySelector('.timestamp-start').value.trim();
+        const end = item.querySelector('.timestamp-end').value.trim();
+        const type = item.querySelector('.timestamp-type').value;
+        
+        if (text && start && end) {
+            timestamps.push({
+                text,
+                timestamp: `${start}:${end}`,
+                type
+            });
+        }
+    });
+    
+    // Sort timestamps by start time
+    timestamps.sort((a, b) => {
+        const aStart = parseFloat(a.timestamp.split(':')[0]);
+        const bStart = parseFloat(b.timestamp.split(':')[0]);
+        return aStart - bStart;
+    });
+    
+    return timestamps;
+}
+
+// Function to save the edited content with sorted timestamps
+function saveEdit() {
+    // Get the edited text
+    const editedText = editableArea.innerHTML;
+    
+    // Get the timestamps and ensure they're sorted
+    sortTimestampsByTime();
+    const timestamps = collectTimestamps();
+    
+    console.log('Saving edited text and timestamps:', timestamps.length);
+    
+    // Apply timestamps to the message bubble using the new function
+    // This will clear old annotations and only apply the new ones
+    applyTimestampsToContent(messageBubble, editedText, timestamps);
+    
+    // Reattach all timestamp handlers to ensure proper functionality
+    reattachAllTimestampHandlers();
+    
+    // Update the audio highlighting based on current playback time
+    highlightCurrentTranscriptSection();
+    
+    // Show success message
+    showToast('Changes saved successfully', 'success');
+    
+    // Save edit history if that function exists
+    if (typeof saveEditHistory === 'function') {
+        saveEditHistory(messageBubble.innerHTML);
+    }
+    
+    // Close popup
+    closePopup();
 }
