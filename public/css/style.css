@@ -804,6 +804,16 @@ button {
   background-color: rgb(233 213 255 / 0.5);
 }
 
+.highlight-morpheme {
+  background-color: rgb(198 246 213 / 0.5);
+  color: #056636;
+  text-decoration: underline;
+  text-decoration-color: #056636;
+  text-decoration-style: dashed;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+
 .metric-card {
   border-radius: 0.5rem;
   --tw-bg-opacity: 1;

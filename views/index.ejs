@@ -609,12 +609,12 @@
     
     /* Morpheme filter styles */
     .annotation-filter[data-type="morpheme"] {
-      color: #4338ca !important;
-      border-color: #818cf8 !important;
+      color: #056636 !important;
+      border-color: #056636 !important;
     }
 
     .annotation-filter[data-type="morpheme"].active-filter {
-      background-color: #818cf8 !important;
+      background-color: #056636 !important;
       color: white !important;
     }
     
@@ -626,9 +626,9 @@
       margin: 0;
       position: relative;
       cursor: pointer;
-      color: #4338ca;
+      color: #056636;
       text-decoration: underline;
-      text-decoration-color: #818cf8;
+      text-decoration-color: #056636;
       text-decoration-style: dashed;
       text-decoration-thickness: 2px;
       text-underline-offset: 2px;
@@ -1107,10 +1107,6 @@
                   <i class="material-icons text-xs mr-1 align-text-top">visibility</i>
                   Pauses
                 </button>
-                <button class="annotation-filter" data-type="grammar">
-                  <i class="material-icons text-xs mr-1 align-text-top">visibility</i>
-                  Grammar
-                </button>
                 <button class="annotation-filter" data-type="repetition">
                   <i class="material-icons text-xs mr-1 align-text-top">visibility</i>
                   Repetition
@@ -1336,49 +1332,10 @@
     </div>
   </div>
 
-  <!-- Grammar Annotation Modal -->
-  <div id="annotationModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
-    <div class="modal-content w-[500px] max-w-full">
-      <div class="flex justify-between items-center mb-5">
-        <h3 class="text-lg font-semibold">Grammar Annotation</h3>
-        <button id="closeAnnotationModal" class="text-neutral-dark hover:text-black">
-          <i class="material-icons">close</i>
-        </button>
-      </div>
-      
-      <div class="mb-4">
-        <label class="block text-sm font-medium mb-2">Original Text</label>
-        <div class="p-3 bg-neutral-lightest rounded border border-neutral-light text-sm">
-          <span class="highlight highlight-grammar">dog's</span> the <span class="highlight highlight-grammar">dog</span> sandcastle
-        </div>
-      </div>
-      
-      <div class="mb-5">
-        <label for="correctedText" class="block text-sm font-medium mb-2">Correction</label>
-        <textarea id="correctedText" rows="3" class="w-full p-3 border border-neutral-light rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Enter corrected text...">dog's sandcastle</textarea>
-      </div>
-      
-      <div class="mb-5">
-        <label for="annotationType" class="block text-sm font-medium mb-2">Type</label>
-        <select id="annotationType" class="w-full p-3 border border-neutral-light rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
-          <option value="grammar">Grammar Error</option>
-          <option value="mispronunciation">Mispronunciation</option>
-          <option value="repetition">Repetition</option>
-          <option value="filler">Filler Word</option>
-        </select>
-      </div>
-      
-      <div class="flex justify-end gap-3">
-        <button id="cancelAnnotation" class="btn btn-secondary py-2 px-4">Cancel</button>
-        <button id="saveAnnotation" class="btn btn-primary py-2 px-4">Save</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Morpheme Annotation Detail Popup -->
   <div id="morphemeDetailPopup" class="fixed hidden p-4 bg-white rounded-lg shadow-lg z-50" style="min-width: 320px;">
     <div class="flex justify-between items-center mb-3">
-      <h4 class="text-sm font-medium">Inflectional morpheme</h4>
+      <h4 class="text-sm font-medium text-green-800">Inflectional morpheme</h4>
       <button id="closeMorphemeDetail" class="text-neutral-dark hover:text-black text-xs">
         <i class="material-icons" style="font-size: 16px;">close</i>
       </button>
@@ -1392,14 +1349,14 @@
           <span id="morphemeSuffix" class="font-medium">-s</span>
         </div>
       </div>
-      <div class="text-sm text-center font-medium py-1 mb-2" id="morphemeCategory">
+      <div class="text-sm text-center font-medium py-1 mb-2 text-green-800" id="morphemeCategory">
         3rd person singular
       </div>
-      <div class="flex justify-between text-xs text-neutral-darker">
+      <div class="flex justify-between text-xs text-green-700">
         <span>Start:</span>
         <span id="morphemeStart" class="font-medium">16.715</span>
       </div>
-      <div class="flex justify-between text-xs text-neutral-darker">
+      <div class="flex justify-between text-xs text-green-700">
         <span>End:</span>
         <span id="morphemeEnd" class="font-medium">17.035</span>
       </div>
@@ -1531,7 +1488,28 @@
             
             // Toggle visibility of all highlights
             document.querySelectorAll('.highlight').forEach(highlight => {
-              highlight.style.backgroundColor = isActive ? 'transparent' : '';
+              if (isActive) {
+                // For morpheme highlights, handle differently
+                if (highlight.classList.contains('highlight-morpheme')) {
+                  highlight.style.color = 'inherit';
+                  highlight.style.textDecoration = 'none';
+                  highlight.classList.add('highlight-hidden');
+                } else {
+                  highlight.style.backgroundColor = 'transparent';
+                }
+              } else {
+                // Restore the morpheme styling
+                if (highlight.classList.contains('highlight-morpheme')) {
+                  highlight.style.color = '#056636';
+                  highlight.style.textDecoration = 'underline';
+                  highlight.style.textDecorationColor = '#056636';
+                  highlight.style.textDecorationStyle = 'dashed';
+                  highlight.style.textDecorationThickness = '2px';
+                  highlight.classList.remove('highlight-hidden');
+                } else {
+                  highlight.style.backgroundColor = '';
+                }
+              }
             });
             
             return;
@@ -1550,9 +1528,26 @@
           // Toggle visibility of matching highlights
           document.querySelectorAll(`.highlight-${filterType}`).forEach(highlight => {
             if (this.classList.contains('active-filter')) {
-              highlight.style.backgroundColor = 'transparent';
+              // For morpheme highlights, we need to handle differently since they use text decoration
+              if (filterType === 'morpheme') {
+                highlight.style.color = 'inherit';
+                highlight.style.textDecoration = 'none';
+                highlight.classList.add('highlight-hidden');
+              } else {
+                highlight.style.backgroundColor = 'transparent';
+              }
             } else {
-              highlight.style.backgroundColor = '';
+              // Restore the morpheme styling
+              if (filterType === 'morpheme') {
+                highlight.style.color = '#056636';
+                highlight.style.textDecoration = 'underline';
+                highlight.style.textDecorationColor = '#056636';
+                highlight.style.textDecorationStyle = 'dashed';
+                highlight.style.textDecorationThickness = '2px';
+                highlight.classList.remove('highlight-hidden');
+              } else {
+                highlight.style.backgroundColor = '';
+              }
             }
           });
         });

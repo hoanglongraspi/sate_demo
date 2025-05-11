@@ -556,6 +556,13 @@ function applyFilters(container) {
     // Show all highlights
     highlights.forEach(highlight => {
       highlight.classList.remove('highlight-hidden');
+      
+      // Special handling to restore morpheme styling
+      if (highlight.classList.contains('highlight-morpheme')) {
+        highlight.style.color = '#056636';
+        highlight.style.textDecoration = 'underline dashed #056636 2px';
+        highlight.style.textUnderlineOffset = '2px';
+      }
     });
     return;
   }
@@ -565,6 +572,12 @@ function applyFilters(container) {
     // Hide all highlights
     highlights.forEach(highlight => {
       highlight.classList.add('highlight-hidden');
+      
+      // Special handling for morpheme highlights
+      if (highlight.classList.contains('highlight-morpheme')) {
+        highlight.style.color = 'inherit';
+        highlight.style.textDecoration = 'none';
+      }
     });
     return;
   }
@@ -572,6 +585,12 @@ function applyFilters(container) {
   // Otherwise, reset all highlights first (hide them all)
   highlights.forEach(highlight => {
     highlight.classList.add('highlight-hidden');
+    
+    // Remove morpheme styling when hidden
+    if (highlight.classList.contains('highlight-morpheme')) {
+      highlight.style.color = 'inherit';
+      highlight.style.textDecoration = 'none';
+    }
   });
   
   // Then show only those that match active filters
@@ -585,11 +604,25 @@ function applyFilters(container) {
     // Show highlights by data-type
     dataTypeHighlights.forEach(highlight => {
       highlight.classList.remove('highlight-hidden');
+      
+      // Restore morpheme styling if needed
+      if (highlight.classList.contains('highlight-morpheme')) {
+        highlight.style.color = '#056636';
+        highlight.style.textDecoration = 'underline dashed #056636 2px';
+        highlight.style.textUnderlineOffset = '2px';
+      }
     });
     
     // Show highlights by class
     classHighlights.forEach(highlight => {
       highlight.classList.remove('highlight-hidden');
+      
+      // Restore morpheme styling if needed
+      if (highlight.classList.contains('highlight-morpheme')) {
+        highlight.style.color = '#056636';
+        highlight.style.textDecoration = 'underline dashed #056636 2px';
+        highlight.style.textUnderlineOffset = '2px';
+      }
     });
   });
 }
@@ -925,7 +958,7 @@ function handleAnalysisResults(results) {
     const morphemeCount_el = document.querySelector('.space-y-2 .flex:nth-child(4) .text-sm.font-medium');
     if (morphemeBar && morphemeCount_el) {
       morphemeBar.style.width = `${(morphemeCount / totalIssues) * 100}%`;
-      morphemeBar.style.backgroundColor = '#818cf8'; // indigo-400
+      morphemeBar.style.backgroundColor = '#056636'; // dark green
       morphemeCount_el.textContent = morphemeCount;
     }
     
@@ -1841,7 +1874,7 @@ function createColorLegend(container) {
     { type: 'pause', label: 'Pause', color: '#60a5fa' }, // blue-400
     { type: 'filler', label: 'Filler', color: '#fb923c' }, // orange-400
     { type: 'repetition', label: 'Repetition', color: '#fbbf24' }, // amber-400
-    { type: 'morpheme', label: 'Morpheme', color: '#818cf8' }, // indigo-400
+    { type: 'morpheme', label: 'Morpheme', color: '#056636' }, // dark green
     { type: 'mispronunciation', label: 'Mispronunciation', color: '#c084fc' }, // purple-400
     { type: 'grammar', label: 'Grammar', color: '#10b981' }  // emerald-500
   ];
@@ -3636,7 +3669,7 @@ function getHighlightColor(type) {
         pause: 'rgba(96, 165, 250, 0.15)', // blue-400 with opacity
         mispronunciation: 'rgba(192, 132, 252, 0.15)', // purple-400 with opacity
         grammar: 'rgba(16, 185, 129, 0.15)', // emerald-500 with opacity
-        morpheme: 'rgba(129, 140, 248, 0.15)' // indigo-400 with opacity
+        morpheme: 'rgba(5, 102, 54, 0.15)' // dark-green color with opacity
     };
     return colors[type] || 'rgba(107, 114, 128, 0.1)';
 }
