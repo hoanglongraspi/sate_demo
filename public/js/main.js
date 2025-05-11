@@ -910,6 +910,7 @@ function handleAnalysisResults(results) {
       fillerCount_el.textContent = fillerCount;
     }
     
+    
     // Repetition progress (3rd item)
     const repetitionBar = document.querySelector('.space-y-2 .flex:nth-child(3) .flex-1 .h-full');
     const repetitionCount_el = document.querySelector('.space-y-2 .flex:nth-child(3) .text-sm.font-medium');
