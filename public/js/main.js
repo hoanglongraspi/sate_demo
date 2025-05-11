@@ -850,7 +850,7 @@ function handleAnalysisResults(results) {
   console.log('Analysis results:', results);
   
   // Update metrics
-  document.querySelector('.metric-card:nth-child(1) .text-2xl').textContent = results.totalIssues || '25';
+  document.querySelector('.metric-card:nth-child(1) .text-2xl').textContent = results.totalIssues || '28';
   document.querySelector('.metric-card:nth-child(2) .text-2xl').textContent = results.duration || '1:17';
   
   const speechRateElement = document.querySelector('.bg-white.rounded-lg.p-5.text-center .text-4xl');
@@ -886,32 +886,55 @@ function handleAnalysisResults(results) {
     const pauseCount = results.issues.find(i => i.type === 'Pauses')?.count || 14;
     const fillerCount = results.issues.find(i => i.type === 'Filler words')?.count || 6;
     const repetitionCount = results.issues.find(i => i.type === 'Repetition')?.count || 4;
+    const morphemeCount = results.issues.find(i => i.type === 'Morphemes')?.count || 3;
+    const mispronunciationCount = results.issues.find(i => i.type === 'Mispronunciation')?.count || 1;
     
     // Update progress bars
-    const totalIssues = pauseCount + fillerCount + repetitionCount;
+    const totalIssues = pauseCount + fillerCount + repetitionCount + morphemeCount + mispronunciationCount;
     
-    // Pause progress
+    // Pause progress (1st item)
     const pauseBar = document.querySelector('.space-y-2 .flex:nth-child(1) .flex-1 .h-full');
     const pauseCount_el = document.querySelector('.space-y-2 .flex:nth-child(1) .text-sm.font-medium');
     if (pauseBar && pauseCount_el) {
       pauseBar.style.width = `${(pauseCount / totalIssues) * 100}%`;
+      pauseBar.style.backgroundColor = '#60a5fa'; // blue-400
       pauseCount_el.textContent = pauseCount;
     }
     
-    // Filler words progress
+    // Filler words progress (2nd item)
     const fillerBar = document.querySelector('.space-y-2 .flex:nth-child(2) .flex-1 .h-full');
     const fillerCount_el = document.querySelector('.space-y-2 .flex:nth-child(2) .text-sm.font-medium');
     if (fillerBar && fillerCount_el) {
       fillerBar.style.width = `${(fillerCount / totalIssues) * 100}%`;
+      fillerBar.style.backgroundColor = '#fb923c'; // orange-400
       fillerCount_el.textContent = fillerCount;
     }
     
-    // Repetition progress
+    // Repetition progress (3rd item)
     const repetitionBar = document.querySelector('.space-y-2 .flex:nth-child(3) .flex-1 .h-full');
     const repetitionCount_el = document.querySelector('.space-y-2 .flex:nth-child(3) .text-sm.font-medium');
     if (repetitionBar && repetitionCount_el) {
       repetitionBar.style.width = `${(repetitionCount / totalIssues) * 100}%`;
+      repetitionBar.style.backgroundColor = '#fbbf24'; // amber-400
       repetitionCount_el.textContent = repetitionCount;
+    }
+    
+    // Morphemes progress (4th item)
+    const morphemeBar = document.querySelector('.space-y-2 .flex:nth-child(4) .flex-1 .h-full');
+    const morphemeCount_el = document.querySelector('.space-y-2 .flex:nth-child(4) .text-sm.font-medium');
+    if (morphemeBar && morphemeCount_el) {
+      morphemeBar.style.width = `${(morphemeCount / totalIssues) * 100}%`;
+      morphemeBar.style.backgroundColor = '#818cf8'; // indigo-400
+      morphemeCount_el.textContent = morphemeCount;
+    }
+    
+    // Check for mispronunciation bar (5th item if it exists)
+    const mispronunciationBar = document.querySelector('.space-y-2 .flex:nth-child(5) .flex-1 .h-full');
+    const mispronunciationCount_el = document.querySelector('.space-y-2 .flex:nth-child(5) .text-sm.font-medium');
+    if (mispronunciationBar && mispronunciationCount_el) {
+      mispronunciationBar.style.width = `${(mispronunciationCount / totalIssues) * 100}%`;
+      mispronunciationBar.style.backgroundColor = '#c084fc'; // purple-400
+      mispronunciationCount_el.textContent = mispronunciationCount;
     }
   }
 }
@@ -990,7 +1013,7 @@ function updateIssueCount(type) {
   
   switch (type) {
     case 'grammar':
-      countElement = document.querySelector('.space-y-2 .flex:nth-child(3) .text-sm.font-medium');
+      countElement = document.querySelector('.space-y-2 .flex:nth-child(4) .text-sm.font-medium');
       break;
     case 'filler':
       countElement = document.querySelector('.space-y-2 .flex:nth-child(2) .text-sm.font-medium');
@@ -999,7 +1022,10 @@ function updateIssueCount(type) {
       countElement = document.querySelector('.space-y-2 .flex:nth-child(3) .text-sm.font-medium');
       break;
     case 'mispronunciation':
-      // We don't have a specific element for this in the top issues, could add one
+      countElement = document.querySelector('.space-y-2 .flex:nth-child(5) .text-sm.font-medium');
+      break;
+    case 'morpheme':
+      countElement = document.querySelector('.space-y-2 .flex:nth-child(4) .text-sm.font-medium');
       break;
   }
   
@@ -1014,12 +1040,21 @@ function updateIssueCount(type) {
       const pauseCount = parseInt(document.querySelector('.space-y-2 .flex:nth-child(1) .text-sm.font-medium')?.textContent || '14');
       const fillerCount = parseInt(document.querySelector('.space-y-2 .flex:nth-child(2) .text-sm.font-medium')?.textContent || '6');
       const repetitionCount = parseInt(document.querySelector('.space-y-2 .flex:nth-child(3) .text-sm.font-medium')?.textContent || '4');
+      const morphemeCount = parseInt(document.querySelector('.space-y-2 .flex:nth-child(4) .text-sm.font-medium')?.textContent || '3');
+      const mispronunciationCount = parseInt(document.querySelector('.space-y-2 .flex:nth-child(5) .text-sm.font-medium')?.textContent || '1');
       
-      const totalCount = pauseCount + fillerCount + repetitionCount;
+      const totalCount = pauseCount + fillerCount + repetitionCount + morphemeCount + mispronunciationCount;
       
       document.querySelector('.space-y-2 .flex:nth-child(1) .flex-1 .h-full').style.width = `${Math.round((pauseCount / totalCount) * 100)}%`;
       document.querySelector('.space-y-2 .flex:nth-child(2) .flex-1 .h-full').style.width = `${Math.round((fillerCount / totalCount) * 100)}%`;
       document.querySelector('.space-y-2 .flex:nth-child(3) .flex-1 .h-full').style.width = `${Math.round((repetitionCount / totalCount) * 100)}%`;
+      document.querySelector('.space-y-2 .flex:nth-child(4) .flex-1 .h-full').style.width = `${Math.round((morphemeCount / totalCount) * 100)}%`;
+      
+      // Only update mispronunciation if the element exists
+      const mispronunciationBar = document.querySelector('.space-y-2 .flex:nth-child(5) .flex-1 .h-full');
+      if (mispronunciationBar) {
+        mispronunciationBar.style.width = `${Math.round((mispronunciationCount / totalCount) * 100)}%`;
+      }
     }
   }
 }
@@ -1537,7 +1572,7 @@ function init() {
   // For demo purposes, fake receiving analysis results
   const demoResults = {
     duration: '1:17',
-    totalIssues: 25,
+    totalIssues: 28,
     speechRate: 100,
     issues: [
       {type: 'Pauses', count: 14},
@@ -1802,11 +1837,12 @@ function createColorLegend(container) {
   legendContainer.className = 'color-legend flex flex-wrap gap-2 mb-4 p-2 bg-gray-50 rounded-md';
   
   const issueTypes = [
-    { type: 'pause', label: 'Pause', color: '#FEF3C7' },
-    { type: 'filler', label: 'Filler', color: '#DBEAFE' },
-    { type: 'repetition', label: 'Repetition', color: '#E0E7FF' },
-    { type: 'mispronunciation', label: 'Mispronunciation', color: '#FEE2E2' },
-    { type: 'grammar', label: 'Grammar', color: '#D1FAE5' }
+    { type: 'pause', label: 'Pause', color: '#60a5fa' }, // blue-400
+    { type: 'filler', label: 'Filler', color: '#fb923c' }, // orange-400
+    { type: 'repetition', label: 'Repetition', color: '#fbbf24' }, // amber-400
+    { type: 'morpheme', label: 'Morpheme', color: '#818cf8' }, // indigo-400
+    { type: 'mispronunciation', label: 'Mispronunciation', color: '#c084fc' }, // purple-400
+    { type: 'grammar', label: 'Grammar', color: '#10b981' }  // emerald-500
   ];
   
   issueTypes.forEach(item => {
@@ -3593,12 +3629,13 @@ function updateTranscriptPreview() {
 // Helper function to get highlight colors
 function getHighlightColor(type) {
     const colors = {
-        word: 'rgba(59, 130, 246, 0.1)',
-        filler: 'rgba(249, 115, 22, 0.15)',
-        repetition: 'rgba(245, 158, 11, 0.15)',
-        pause: 'rgba(59, 130, 246, 0.15)',
-        mispronunciation: 'rgba(168, 85, 247, 0.15)',
-        grammar: 'rgba(16, 185, 129, 0.15)'
+        word: 'rgba(59, 130, 246, 0.1)', // blue-400 with opacity
+        filler: 'rgba(251, 146, 60, 0.15)', // orange-400 with opacity
+        repetition: 'rgba(251, 191, 36, 0.15)', // amber-400 with opacity
+        pause: 'rgba(96, 165, 250, 0.15)', // blue-400 with opacity
+        mispronunciation: 'rgba(192, 132, 252, 0.15)', // purple-400 with opacity
+        grammar: 'rgba(16, 185, 129, 0.15)', // emerald-500 with opacity
+        morpheme: 'rgba(129, 140, 248, 0.15)' // indigo-400 with opacity
     };
     return colors[type] || 'rgba(107, 114, 128, 0.1)';
 }
