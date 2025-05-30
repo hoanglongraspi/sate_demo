@@ -164,7 +164,13 @@ function showAnnotationDetailPopup(e) {
   
   // Show the popup
   annotationDetailPopup.classList.remove('hidden');
-  annotationDetailPopup.classList.add('show');
+  annotationDetailPopup.classList.add('flex');
+  
+  // Update the intended transcript with this annotation
+  updateIntendedTranscript(highlight);
+  
+  // Update annotation counter (in case filters changed)
+  updateAnnotationCounter();
 }
 
 // Function to hide the annotation detail popup
@@ -355,19 +361,18 @@ function handleAnnotationFilter(e) {
 
 // Apply filters to all relevant message bubbles in the document
 function applyFiltersToDocument() {
-  const messageBubbles = document.querySelectorAll('.message-bubble.patient');
+  const patientBubbles = document.querySelectorAll('.message-bubble.patient');
   
-  if (messageBubbles.length === 0) {
-    console.warn('No message bubbles found to apply filters to');
-    return;
-  }
-  
-  messageBubbles.forEach(bubble => {
+  // Apply filters to each bubble
+  patientBubbles.forEach(bubble => {
     applyFilters(bubble);
   });
   
-  // Update visibility indicators in the control bar
+  // Update annotation visibility indicators
   updateAnnotationVisibilityIndicators();
+  
+  // Update annotation counter after filtering
+  updateAnnotationCounter();
 }
 
 // Function to update annotation visibility indicators in the control bar
@@ -1565,6 +1570,44 @@ function loadSidebarState() {
   }
 }
 
+// Initialize tab switching functionality
+function initializeTabSwitching() {
+  const tabs = document.querySelectorAll('.tab');
+  
+  if (!tabs || tabs.length === 0) {
+    console.warn('No tabs found for initialization');
+    return;
+  }
+  
+  // Add click events to tabs
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      // Update active tab
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      
+      // Get the tab name from data attribute
+      const tabName = tab.getAttribute('data-tab');
+      
+      // Show appropriate content
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+        content.classList.remove('active');
+      });
+      
+      const activeContent = document.getElementById(`${tabName}-tab`);
+      if (activeContent) {
+        activeContent.classList.remove('hidden');
+        activeContent.classList.add('active');
+      }
+      
+      console.log(`Switched to ${tabName} tab`);
+    });
+  });
+  
+  console.log('Tab switching initialized for', tabs.length, 'tabs');
+}
+
 // Initialize the app
 function init() {
   // Hide the modals
@@ -1578,6 +1621,12 @@ function init() {
     annotationModal.classList.add('hidden');
     annotationModal.classList.remove('flex');
   }
+  
+  // Load transcript data for intended transcript functionality
+  loadTranscriptData();
+  
+  // Initialize tab switching functionality
+  initializeTabSwitching();
   
   // Initialize audio system
   initializeAudioPlayer();
@@ -1602,6 +1651,9 @@ function init() {
   
   // Load saved sidebar state
   loadSidebarState();
+  
+  // Initialize annotation counter
+  updateAnnotationCounter();
   
   // For demo purposes, fake receiving analysis results
   const demoResults = {
@@ -4473,3 +4525,334 @@ function reattachAllTimestampHandlers() {
     
     console.log("All timestamp handlers reattached successfully");
 }
+
+// Update annotation counter in right sidebar
+function updateAnnotationCounter() {
+  const counter = document.getElementById('annotationCounter');
+  const countList = document.getElementById('annotationCountList');
+  
+  if (!counter || !countList) return;
+  
+  // Count annotations by type across all visible highlights
+  const annotationCounts = {};
+  let totalCount = 0;
+  
+  // Only count visible annotations (not hidden by filters)
+  document.querySelectorAll('.highlight:not(.highlight-hidden)').forEach(highlight => {
+    const type = highlight.getAttribute('data-type');
+    if (type) {
+      annotationCounts[type] = (annotationCounts[type] || 0) + 1;
+      totalCount++;
+    }
+  });
+  
+  // Show or hide the counter based on whether there are annotations
+  if (totalCount === 0) {
+    counter.classList.add('hidden');
+    return;
+  }
+  
+  counter.classList.remove('hidden');
+  
+  // Clear existing counts
+  countList.innerHTML = '';
+  
+  // Define colors for each annotation type
+  const typeColors = {
+    pause: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
+    filler: { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
+    repetition: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
+    mispronunciation: { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200' },
+    morpheme: { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200' }
+  };
+  
+  // Sort by count (highest first)
+  const sortedTypes = Object.entries(annotationCounts).sort((a, b) => b[1] - a[1]);
+  
+  // Create count items
+  sortedTypes.forEach(([type, count]) => {
+    const colors = typeColors[type] || { bg: 'bg-gray-50', text: 'text-gray-700', border: 'border-gray-200' };
+    const displayName = type.charAt(0).toUpperCase() + type.slice(1);
+    
+    const countItem = document.createElement('div');
+    countItem.className = `flex items-center justify-between p-2 rounded-md ${colors.bg} ${colors.border} border cursor-pointer hover:shadow-sm transition-shadow`;
+    countItem.setAttribute('data-annotation-type', type);
+    
+    countItem.innerHTML = `
+      <div class="flex items-center">
+        <div class="w-2 h-2 rounded-full ${colors.text.replace('text-', 'bg-')} mr-2"></div>
+        <span class="text-xs font-medium ${colors.text}">${displayName}</span>
+      </div>
+      <span class="text-sm font-bold ${colors.text}">${count}</span>
+    `;
+    
+    // Add click handler to highlight annotations of this type
+    countItem.addEventListener('click', () => {
+      highlightAnnotationType(type);
+    });
+    
+    countList.appendChild(countItem);
+  });
+}
+
+// Highlight all annotations of a specific type
+function highlightAnnotationType(type) {
+  // Clear existing selections
+  document.querySelectorAll('.highlight-selected').forEach(el => {
+    el.classList.remove('highlight-selected');
+  });
+  
+  // Find and highlight all annotations of this type
+  const typeAnnotations = document.querySelectorAll(`.highlight[data-type="${type}"]:not(.highlight-hidden)`);
+  
+  if (typeAnnotations.length > 0) {
+    // Add selection class to all of this type
+    typeAnnotations.forEach(annotation => {
+      annotation.classList.add('highlight-selected');
+    });
+    
+    // Scroll to the first one
+    typeAnnotations[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
+    // Auto-remove selection after 3 seconds
+    setTimeout(() => {
+      document.querySelectorAll('.highlight-selected').forEach(el => {
+        el.classList.remove('highlight-selected');
+      });
+    }, 3000);
+  }
+}
+
+// Update intended transcript display
+function updateIntendedTranscript(clickedAnnotation = null) {
+  console.log('updateIntendedTranscript called with:', clickedAnnotation);
+  
+  const intendedContent = document.getElementById('intendedTranscriptContent');
+  if (!intendedContent) {
+    console.error('intendedTranscriptContent element not found');
+    return;
+  }
+  
+  // If no specific annotation is clicked, show general message
+  if (!clickedAnnotation) {
+    intendedContent.innerHTML = `
+      <div class="text-sm text-gray-600 italic">
+        Click on any annotation in the chat to see the intended transcript for that segment.
+      </div>
+    `;
+    return;
+  }
+  
+  // Get the segment data from the annotation
+  const timestamp = clickedAnnotation.getAttribute('data-timestamp');
+  const annotationType = clickedAnnotation.getAttribute('data-type');
+  const actualText = clickedAnnotation.textContent;
+  
+  console.log('Annotation data:', {timestamp, annotationType, actualText});
+  
+  if (!timestamp) {
+    console.error('No timestamp found on annotation');
+    return;
+  }
+  
+  // Find the corresponding segment in the transcript data
+  const segment = findSegmentByTimestamp(timestamp);
+  console.log('Found segment:', segment);
+  
+  if (segment && segment.intend) {
+    // Clear previous content
+    intendedContent.innerHTML = '';
+    
+    // Create the intended transcript display
+    const intendedDisplay = document.createElement('div');
+    intendedDisplay.className = 'space-y-4';
+    
+    // Annotation info header
+    const header = document.createElement('div');
+    header.className = 'border-l-4 border-blue-400 pl-3 py-2 bg-blue-50 rounded-r-md';
+    header.innerHTML = `
+      <div class="flex items-center justify-between mb-2">
+        <h5 class="text-sm font-semibold text-blue-800">
+          ${annotationType.charAt(0).toUpperCase() + annotationType.slice(1)} Annotation
+        </h5>
+        <span class="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">${timestamp.split(':')[0]}s</span>
+      </div>
+    `;
+    
+    // Actual vs Intended comparison
+    const comparison = document.createElement('div');
+    comparison.className = 'grid grid-cols-1 gap-3';
+    comparison.innerHTML = `
+      <div class="bg-red-50 border border-red-200 rounded-lg p-3">
+        <h6 class="text-xs font-medium text-red-700 mb-1">Actual Speech</h6>
+        <p class="text-sm text-red-800">"${actualText}"</p>
+      </div>
+      
+      <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+        <h6 class="text-xs font-medium text-green-700 mb-1">Intended Speech</h6>
+        <p class="text-sm text-green-800">"${segment.intend}"</p>
+      </div>
+    `;
+    
+    intendedDisplay.appendChild(header);
+    intendedDisplay.appendChild(comparison);
+    intendedContent.appendChild(intendedDisplay);
+    
+    console.log('Intended transcript content updated');
+    
+    // Auto-switch to intended tab if not already active
+    const intendedTab = document.querySelector('.tab[data-tab="intended"]');
+    const intendedTabContent = document.getElementById('intended-tab');
+    
+    console.log('Tab elements:', {intendedTab, intendedTabContent});
+    
+    if (intendedTab && intendedTabContent && !intendedTab.classList.contains('active')) {
+      // Switch to intended tab
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+        content.classList.remove('active');
+      });
+      
+      intendedTab.classList.add('active');
+      intendedTabContent.classList.remove('hidden');
+      intendedTabContent.classList.add('active');
+    }
+  }
+}
+
+// Helper function to find segment data by timestamp
+function findSegmentByTimestamp(timestamp) {
+  // This would typically load from the transcript data
+  // For now, we'll use the attached JSON data structure
+  const transcriptData = window.transcriptData || [];
+  
+  if (transcriptData.segments) {
+    const [startTime] = timestamp.split(':').map(Number);
+    
+    return transcriptData.segments.find(segment => {
+      return startTime >= segment.start && startTime <= segment.end;
+    });
+  }
+  
+  return null;
+}
+
+// Load transcript data for intended transcript functionality
+function loadTranscriptData() {
+  // For demo purposes, load the provided JSON structure directly
+  // In a real application, this would fetch from your server
+  window.transcriptData = {
+    "segments": [
+      {
+        "start": 3.565,
+        "end": 5.406,
+        "text": "Okay, tell me this story.",
+        "intend": "Okay, tell me this story.",
+        "speaker": "Examiner"
+      },
+      {
+        "start": 5.295,
+        "end": 7.715,
+        "text": "um a rabbit .",
+        "intend": "a rabbit.",
+        "speaker": "Child"
+      },
+      {
+        "start": 8.555,
+        "end": 13.815,
+        "text": "some help with the um with the dog .",
+        "intend": "some help with the dog.",
+        "speaker": "Child"
+      },
+      {
+        "start": 15.555,
+        "end": 21.215,
+        "text": "and he wants some help to with me to know how to make a sandcastle .",
+        "intend": "and he wants some help with me to know how to make a sandcastle.",
+        "speaker": "Child"
+      },
+      {
+        "start": 25.305,
+        "end": 28.745,
+        "text": "and he um the rabbit make a sandcastle .",
+        "intend": "and the rabbit makes a sandcastle.",
+        "speaker": "Child"
+      },
+      {
+        "start": 30.545,
+        "end": 41.005,
+        "text": "and the rabbit dump all the sand to the the sandcastle .",
+        "intend": "and the rabbit dumps all the sand to the sandcastle.",
+        "speaker": "Child"
+      },
+      {
+        "start": 43.715,
+        "end": 54.035,
+        "text": "and he is he that accidentally um broke his the dog's the dog sandcastle .",
+        "intend": "and that accidentally broke the dog's sandcastle.",
+        "speaker": "Child"
+      },
+      {
+        "start": 58.075,
+        "end": 64.815,
+        "text": "and he the dog never um make a sandcastle .",
+        "intend": "and the dog never makes a sandcastle.",
+        "speaker": "Child"
+      },
+      {
+        "start": 65.595,
+        "end": 66.435,
+        "text": "and he cried .",
+        "intend": "and he cried.",
+        "speaker": "Child"
+      },
+      {
+        "start": 67.355,
+        "end": 72.975,
+        "text": "and there bunny rabbit um be sorry that he .",
+        "intend": "and there bunny rabbit be sorry that he.",
+        "speaker": "Child"
+      }
+    ]
+  };
+  
+  console.log('Transcript data loaded with', window.transcriptData.segments.length, 'segments');
+}
+
+// Test function for debugging intended transcript
+function testIntendedTranscript() {
+  console.log('Testing intended transcript functionality...');
+  
+  // Test 1: Check if elements exist
+  const intendedContent = document.getElementById('intendedTranscriptContent');
+  const intendedTab = document.querySelector('.tab[data-tab="intended"]');
+  const intendedTabContent = document.getElementById('intended-tab');
+  
+  console.log('Elements check:', {
+    intendedContent: !!intendedContent,
+    intendedTab: !!intendedTab,
+    intendedTabContent: !!intendedTabContent
+  });
+  
+  // Test 2: Check if transcript data is loaded
+  console.log('Transcript data:', window.transcriptData);
+  
+  // Test 3: Find a sample annotation and test it
+  const firstHighlight = document.querySelector('.highlight[data-timestamp]');
+  if (firstHighlight) {
+    console.log('Testing with first highlight:', firstHighlight);
+    updateIntendedTranscript(firstHighlight);
+  } else {
+    console.log('No highlights found with timestamps');
+  }
+  
+  // Test 4: Manually switch to intended tab
+  if (intendedTab) {
+    console.log('Manually clicking intended tab');
+    intendedTab.click();
+  }
+}
+
+// Make the test function globally available
+window.testIntendedTranscript = testIntendedTranscript;

@@ -815,6 +815,58 @@
     }
     
     /* Progress handle improvement */
+    .annotation-filter[data-type="morpheme"].active-filter {
+      background-color: #056636 !important;
+      color: white !important;
+    }
+    
+    /* Highlight selected state for annotations */
+    .highlight-selected {
+      background-color: rgba(59, 130, 246, 0.3) !important;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.6) !important;
+      border-radius: 3px !important;
+      animation: pulse-highlight 2s ease-in-out;
+    }
+    
+    @keyframes pulse-highlight {
+      0%, 100% { 
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.6);
+      }
+      50% { 
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.4);
+      }
+    }
+    
+    /* Annotation counter specific styles */
+    #annotationCounter {
+      transition: all 0.3s ease;
+    }
+    
+    #annotationCounter.hidden {
+      transform: translateY(-10px);
+      opacity: 0;
+    }
+    
+    #annotationCountList [data-annotation-type]:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Intended transcript tab styling */
+    #intended-tab .border-l-4 {
+      animation: slideInRight 0.3s ease-out;
+    }
+    
+    @keyframes slideInRight {
+      from {
+        transform: translateX(10px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
   </style>
 </head>
 <body class="bg-neutral-lightest has-tip-banner">
@@ -1138,9 +1190,30 @@
         
         <div class="mb-5">
           <h3 class="text-lg mb-3">Speech Analysis</h3>
+          
+          <!-- Report Button -->
+          <!-- <div class="mb-4">
+            <a href="/report" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg font-medium text-center block hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+              <i class="material-icons text-lg mr-2 align-middle">assessment</i>
+              View Detailed Report
+            </a>
+          </div> -->
+          
+          <!-- Annotation Counter Section -->
+          <div id="annotationCounter" class="bg-white rounded-lg p-4 shadow-card mb-4 hidden">
+            <h4 class="text-sm font-medium text-gray-700 mb-3 flex items-center">
+              <i class="material-icons text-sm mr-2">analytics</i>
+              Active Annotations
+            </h4>
+            <div id="annotationCountList" class="space-y-2">
+              <!-- Annotation counts will be populated here dynamically -->
+            </div>
+          </div>
+          
           <div class="flex border-b border-neutral-light">
             <div class="tab active" data-tab="overview">Overview</div>
             <div class="tab" data-tab="issues">Issues</div>
+            <div class="tab" data-tab="intended">Intended</div>
           </div>
         </div>
         
@@ -1293,6 +1366,23 @@
             </div>
             
             
+          </div>
+        </div>
+        
+        <!-- Intended Transcript Tab Content -->
+        <div id="intended-tab" class="tab-content hidden">
+          <div class="bg-white rounded-lg p-5 shadow-card">
+            <h4 class="text-base mb-4 flex items-center">
+              <i class="material-icons text-neutral-darker mr-2" style="font-size: 20px;">text_snippet</i>
+              <span>Intended Transcript</span>
+            </h4>
+            
+            <div id="intendedTranscriptContent" class="space-y-4">
+              <!-- Content will be populated dynamically from JSON data -->
+              <div class="text-sm text-gray-600 italic">
+                Click on any annotation in the chat to see the intended transcript for that segment.
+              </div>
+            </div>
           </div>
         </div>
       </div>
